@@ -7,5 +7,4 @@ rsync -avhP --exclude='node_modules' \
     --exclude='build'  \
     --exclude='package-lock.json'  \
     --exclude='.vscode'  \
-    --exclude='dist'  \
     . matrix:~/matrix-dash
