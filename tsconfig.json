@@ -8,7 +8,7 @@
     //   "experimentalDecorators": true,
       "forceConsistentCasingInFileNames": true,
       "lib": [ "esnext" ],
-      "module": "esnext",
+      "module": "commonjs",
     //   "moduleResolution": "node",
       "noImplicitAny": true,
       "noImplicitReturns": true,
