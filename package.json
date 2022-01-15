@@ -1,0 +1,21 @@
+{
+  "name": "matrix-dash",
+  "version": "1.0.0",
+  "description": "Dashboard for matrix LED",
+  "main": "index.js",
+  "author": "Konstantin Klitenik",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/konstk1/matrix-dash.git"
+  },
+  "scripts": {
+    "start": "ts-node index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.8",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
