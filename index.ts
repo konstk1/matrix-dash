@@ -2,7 +2,7 @@
 import { matrix } from './src/matrix';
 // import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
-import { FilledRectangle } from './src/widget';
+import { FilledRectangle, TextWidget } from './src/widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -20,40 +20,28 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     try {
         console.log('Matrix dash starting...');
 
+        matrix && matrix.brightness(30);
+
         const page1 = new Page(matrix, 'page1');
 
-        const rect1 = new FilledRectangle({ width: 20, height: 10 }, 1);
+        const rect1 = new FilledRectangle({ width: 32, height: 16 }, 1);
+        rect1.fgColor = 0xFF00FF;
         page1.addWidget(rect1, { x: 0, y: 0 });
 
-        const rect2 = new FilledRectangle({ width: 20, height: 10 }, 1);
-        page1.addWidget(rect2, { x: 20, y: 0 });
+        const rect2 = new FilledRectangle({ width: 32, height: 16 }, 1);
+        rect2.bgColor = 0xFF0000;
+        page1.addWidget(rect2, { x: 32, y: 0 });
+
+        const rect3 = new FilledRectangle({ width: 32, height: 16 }, 1);
+        rect3.fgColor = 0xFF00FF;
+        page1.addWidget(rect3, { x: 0, y: 16 });
+
+        const rect4 = new TextWidget({ width: 32, height: 16 }, 1);
+        page1.addWidget(rect4, { x: 32, y: 16 });
 
         page1.draw();
-        // const font = new Font('helvR12', `${process.cwd()}/node_modules/rpi-led-matrix/fonts/helvR12.bdf`);
-        // matrix.font(font);
-
-        // matrix
-        //     .clear()
-        //     .brightness(30)
-        //     .fgColor(0x0000FF)
-        //     // .fill()
-        //     .fgColor(0xFFFF00)
-        //     .drawCircle(matrix.width() / 2, matrix.height() / 2, matrix.height() / 2 - 1)
-        //     .fgColor(Colors.red)
-        //     .drawText("LED", matrix.width() / 2 - 11, matrix.height() / 2 - 7)
-        //     .sync();
-        // // const interval = 5000;
-        // // matrix.fgColor(Colors.red).fill().sync();
-        // // await sleep(interval);
-        // // matrix.fgColor(Colors.blue).fill().sync();
-        // // await sleep(interval);
-        // // matrix.fgColor(Colors.green).fill().sync();
-        // // await sleep(interval);
-        // // matrix.clear();
-        // // await sleep(interval);
-
         // console.log('Done');
-        sleep(1);
+        sleep(20000);
     } catch (error) {
         console.error(error);
     }

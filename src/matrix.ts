@@ -1,6 +1,6 @@
 // import { LedMatrix, LedMatrixInstance, GpioMapping, MatrixOptions, MuxType, RowAddressType, ScanMode, RuntimeOptions, RuntimeFlag } from 'rpi-led-matrix';
 // @ts-nocheck
-import { LedMatrix, LedMatrixInstance, GpioMapping } from "rpi-led-matrix";
+import { LedMatrix, LedMatrixInstance, GpioMapping, Font } from "rpi-led-matrix";
 
 // const defaultMatrixOptions: MatrixOptions = {
 //     brightness: 100,
@@ -29,7 +29,7 @@ import { LedMatrix, LedMatrixInstance, GpioMapping } from "rpi-led-matrix";
 //     gpioSlowdown: 2,
 // }
 
-declare let matrix: LedMatrixInstance;
+let matrix: LedMatrixInstance;
 
 if (process.env.NODE_ENV !== 'test') {
     // @ts-ignore
@@ -46,4 +46,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-export { LedMatrixInstance, matrix };
+export { LedMatrixInstance, Font, matrix };

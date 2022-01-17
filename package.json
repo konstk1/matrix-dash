@@ -12,7 +12,7 @@
   "scripts": {
     "start": "ts-node index.ts",
     "build": "tsc",
-    "watch": "nodemon -w dist --exec \"sudo node dist/index.js\"",
+    "watch": "nodemon -w dist --delay 1 --exec \"sudo node dist/index.js\"",
     "sync": "npm run build && ./sync.sh",
     "test": "NODE_ENV=test npm start"
   },
