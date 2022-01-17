@@ -1,4 +1,4 @@
-import { LedMatrixInstance } from './matrix';
+import { LedMatrixInstance, matrix } from './matrix';
 import { Widget, Coordinates } from './widget';
 
 export class Page {
@@ -19,7 +19,8 @@ export class Page {
     public draw() {
         console.log(`Drawing page ${this.title}`);
         this.widgets.forEach(widget => {
-            widget.draw(this.matrix);
+            widget.draw(this.matrix, false);
         });
+        matrix.sync();
     }
 }
