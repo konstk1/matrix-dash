@@ -21,6 +21,9 @@ export class Page {
         this.widgets.forEach(widget => {
             widget.draw(this.matrix, false);
         });
-        matrix.sync();
+        
+        if (matrix) {
+            matrix.sync();
+        }
     }
 }
