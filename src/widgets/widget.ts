@@ -19,12 +19,20 @@ export abstract class Widget {
         this.border = border;
     }
 
-    abstract draw(sync: boolean): void;
+    public abstract draw(sync: boolean): void;
+
+    public activate(): void {
+        console.log(`${this.constructor.name}: activate not implemented`);
+    }
+
+    public deactivate(): void {
+        console.log(`${this.constructor.name}: deactivate not implemented`);
+    }
 }
 
 export class FilledRectangle extends Widget {
     public draw(sync: boolean = true): void {
-        console.log(`  Drawing ${typeof this} from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
+        console.log(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
 
         // skip actual drawing if testing (matrix undefined)
         if (!matrix) {

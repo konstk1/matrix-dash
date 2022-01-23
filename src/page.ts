@@ -26,4 +26,16 @@ export class Page {
             this.matrix.sync();
         }
     }
+
+    public activate() {
+        this.widgets.forEach(widget => {
+            widget.activate();
+        });
+    }
+
+    public deactivate() {
+        this.widgets.forEach(widget => {
+            widget.deactivate();
+        });
+    }
 }

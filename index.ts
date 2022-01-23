@@ -3,7 +3,7 @@ import { matrix } from './src/matrix';
 // import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
 import { FilledRectangle } from './src/widgets/widget';
-import { TextWidget } from './src/widgets/text-widget';
+import { WeatherWidget } from './src/widgets/weather-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -37,18 +37,15 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
         rect3.fgColor = 0xFF00FF;
         page1.addWidget(rect3, { x: 0, y: 16 });
 
-        const rect4 = new TextWidget({ width: 32, height: 16 }, 1);
+        const rect4 = new WeatherWidget({ width: 32, height: 16 }, 1);
         page1.addWidget(rect4, { x: 32, y: 16 });
 
         page1.draw();
+        page1.activate();
 
-        for (let i = 0; i < 10; i++) {
-          rect4.text = `+${i+30}°F`;
-          rect4.draw(true);
-          await sleep(2000);
-        }
         // console.log('Done');
-        await sleep(20000);
+        await sleep(10000);
+        page1.deactivate();
     } catch (error) {
         console.error(error);
     }
