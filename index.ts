@@ -2,7 +2,8 @@
 import { matrix } from './src/matrix';
 // import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
-import { FilledRectangle, TextWidget } from './src/widget';
+import { FilledRectangle } from './src/widgets/widget';
+import { TextWidget } from './src/widgets/text-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -22,7 +23,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         matrix && matrix.brightness(30);
 
-        const page1 = new Page(matrix, 'page1');
+        const page1 = new Page('page1');
 
         const rect1 = new FilledRectangle({ width: 32, height: 16 }, 1);
         rect1.fgColor = 0xFF00FF;
@@ -43,7 +44,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
         for (let i = 0; i < 10; i++) {
           rect4.text = `+${i+30}°F`;
-          rect4.draw(matrix, true);
+          rect4.draw(true);
           await sleep(2000);
         }
         // console.log('Done');

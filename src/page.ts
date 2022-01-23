@@ -1,13 +1,13 @@
-import { LedMatrixInstance, matrix } from './matrix';
-import { Widget, Coordinates } from './widget';
+import { matrix } from './matrix';
+import { Widget, Coordinates } from './widgets/widget';
 
 export class Page {
-    private matrix: LedMatrixInstance;
     public title: string;
     public widgets: Widget[] = [];
 
-    constructor(matrix: LedMatrixInstance, title: string) {
-        this.matrix = matrix;
+    private matrix = matrix;
+
+    constructor(title: string) {
         this.title = title
     }
 
@@ -19,11 +19,11 @@ export class Page {
     public draw() {
         console.log(`Drawing page ${this.title}`);
         this.widgets.forEach(widget => {
-            widget.draw(this.matrix, false);
+            widget.draw(false);
         });
         
-        if (matrix) {
-            matrix.sync();
+        if (this.matrix) {
+            this.matrix.sync();
         }
     }
 }

@@ -1,4 +1,4 @@
-import { LedMatrixInstance, Font } from './matrix';
+import { matrix } from '../matrix';
 
 export type Coordinates = { x: number, y: number };
 export type Size = { width: number, height: number };
@@ -11,16 +11,19 @@ export abstract class Widget {
     public fgColor = 0xFFFFFF;
     public bgColor = 0x000000;
 
+    // @ts-ignore
+    protected matrix = matrix;
+
     constructor(size: Size, border: number = 0) {
         this.size = size;
         this.border = border;
     }
 
-    abstract draw(matrix: LedMatrixInstance, sync: boolean): void;
+    abstract draw(sync: boolean): void;
 }
 
 export class FilledRectangle extends Widget {
-    public draw(matrix: LedMatrixInstance, sync: boolean = true): void {
+    public draw(sync: boolean = true): void {
         console.log(`  Drawing ${typeof this} from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
 
         // skip actual drawing if testing (matrix undefined)
@@ -38,29 +41,6 @@ export class FilledRectangle extends Widget {
                 .fgColor(this.fgColor)
                 .drawRect(this.origin.x, this.origin.y, this.size.width - 1, this.size.height - 1);
         }
-
-        if (sync) {
-            matrix.sync();
-        }
-    }
-}
-
-export class TextWidget extends FilledRectangle {
-    public text: string = '+32°F';
-    public fontName: string =  '6x10';
-
-    public draw(matrix: LedMatrixInstance, sync: boolean = true): void {
-        super.draw(matrix, false);
-
-        if (!matrix) { return; }
-
-        console.log('  Drawing text: ', this.text);
-        const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
-
-        matrix
-            .font(font)
-            .fgColor(this.fgColor)
-            .drawText(this.text, this.origin.x + 2, this.origin.y + 2, -1);
 
         if (sync) {
             matrix.sync();
