@@ -39,7 +39,6 @@ export class FilledRectangle extends Widget {
             return;
         }
 
-        console.log('  Actually drawing...');
         matrix
             .fgColor(this.bgColor)
             .fill(this.origin.x, this.origin.y, this.origin.x + this.size.width - 1, this.origin.y + this.size.height - 1);

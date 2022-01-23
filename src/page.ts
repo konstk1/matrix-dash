@@ -28,6 +28,7 @@ export class Page {
     }
 
     public activate() {
+        this.draw();
         this.widgets.forEach(widget => {
             widget.activate();
         });

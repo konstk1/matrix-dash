@@ -4,6 +4,7 @@ import { matrix } from './src/matrix';
 import { Page } from './src/page';
 import { FilledRectangle } from './src/widgets/widget';
 import { WeatherWidget } from './src/widgets/weather-widget';
+import { ClockWidget } from './src/widgets/clock-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -21,30 +22,29 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     try {
         console.log('Matrix dash starting...');
 
-        matrix && matrix.brightness(30);
+        matrix && matrix.brightness(20);
 
         const page1 = new Page('page1');
 
-        const rect1 = new FilledRectangle({ width: 32, height: 16 }, 1);
-        rect1.fgColor = 0xFF00FF;
-        page1.addWidget(rect1, { x: 0, y: 0 });
+        const clock = new ClockWidget({ width: 32, height: 16 }, 0);
+        clock.fgColor = 0xFF00FF;
+        page1.addWidget(clock, { x: 0, y: 0 });
 
-        const rect2 = new FilledRectangle({ width: 32, height: 16 }, 0);
-        rect2.bgColor = 0xFF0000;
-        page1.addWidget(rect2, { x: 32, y: 0 });
+        const weather = new WeatherWidget({ width: 32, height: 16 }, 1);
+        weather.border = 0;
+        page1.addWidget(weather, { x: 32, y: 0 });
+
+        const rect2 = new FilledRectangle({ width: 32, height: 16 }, 1);
+        page1.addWidget(rect2, { x: 32, y: 16 });
 
         const rect3 = new FilledRectangle({ width: 32, height: 16 }, 1);
         rect3.fgColor = 0xFF00FF;
         page1.addWidget(rect3, { x: 0, y: 16 });
 
-        const rect4 = new WeatherWidget({ width: 32, height: 16 }, 1);
-        page1.addWidget(rect4, { x: 32, y: 16 });
-
-        page1.draw();
         page1.activate();
 
         // console.log('Done');
-        await sleep(10000);
+        await sleep(30000);
         page1.deactivate();
     } catch (error) {
         console.error(error);
