@@ -28,6 +28,6 @@ export class TextWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        console.log(`  ${this.constructor.name} Drawing done`);
+        // console.log(`  ${this.constructor.name} Drawing done`);
     }
 }

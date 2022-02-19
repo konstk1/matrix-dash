@@ -22,7 +22,8 @@
       "suppressImplicitAnyIndexErrors": false,
       "strictPropertyInitialization": true,
       "types": [
-        "node"
+        "node",
+        "jest",
       ],
       "target": "esnext",
       "outDir": "./dist",

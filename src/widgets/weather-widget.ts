@@ -1,9 +1,12 @@
 import { FilledRectangle } from './widget';
 import { Font } from '../matrix';
+import { Weather } from '../services/weather';
 
 export class WeatherWidget extends FilledRectangle {
     public fontName: string =  '6x10';
+    public updateIntervalSec = 1 * 10;
 
+    private readonly weather = new Weather();
     private tempF: number = 32;
     private timer?: NodeJS.Timer;
 
@@ -13,7 +16,7 @@ export class WeatherWidget extends FilledRectangle {
         if (!this.matrix) { return; }
 
         const text = `+${this.tempF}°F`;
-        console.log(`  ${this.constructor.name} Drawing text: ${text}`);
+        // console.log(`  ${this.constructor.name} Drawing text: ${text}`);
         const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
 
         this.matrix
@@ -25,15 +28,20 @@ export class WeatherWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        console.log(`  ${this.constructor.name} Drawing done`);
+        // console.log(`  ${this.constructor.name} Drawing done`);
+    }
+
+    private updateScreen(tempF: number) {
+        this.tempF = Math.round(tempF);
+        this.draw(true);
     }
 
     public override activate(): void {
         console.log(`${this.constructor.name}: Activating`);
-        this.timer = setInterval(() => {
-            this.tempF += 1;
-            this.draw(true);
-        }, 2000);
+        this.timer = setInterval(async () => {
+            const current = await this.weather.getWeather();
+            this.updateScreen(current.tempF);
+        }, this.updateIntervalSec * 1000);
     }
 
     public override deactivate(): void {

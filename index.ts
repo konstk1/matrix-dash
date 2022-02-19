@@ -1,4 +1,5 @@
 
+import 'dotenv/config';
 import { matrix } from './src/matrix';
 // import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
@@ -27,24 +28,26 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
         const page1 = new Page('page1');
 
         const clock = new ClockWidget({ width: 32, height: 16 }, 0);
-        clock.fgColor = 0xFF00FF;
+        // clock.fgColor = 0xFF00FF;
         page1.addWidget(clock, { x: 0, y: 0 });
 
-        const weather = new WeatherWidget({ width: 32, height: 16 }, 1);
-        weather.border = 0;
+        const weather = new WeatherWidget({ width: 32, height: 16 }, 0);
         page1.addWidget(weather, { x: 32, y: 0 });
 
         const rect2 = new FilledRectangle({ width: 32, height: 16 }, 1);
         page1.addWidget(rect2, { x: 32, y: 16 });
 
         const rect3 = new FilledRectangle({ width: 32, height: 16 }, 1);
-        rect3.fgColor = 0xFF00FF;
+        // rect3.fgColor = 0xFF00FF;
         page1.addWidget(rect3, { x: 0, y: 16 });
 
         page1.activate();
 
         // console.log('Done');
-        await sleep(30000);
+        while (true) {
+            await sleep(1000);
+        }
+        
         page1.deactivate();
     } catch (error) {
         console.error(error);

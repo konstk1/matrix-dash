@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'test') {
         rows: 32,
         cols: 64,
         hardwareMapping: GpioMapping.AdafruitHat,
-        showRefreshRate: true,
+        showRefreshRate: false,
     }, {
         ...LedMatrix.defaultRuntimeOptions(),
         gpioSlowdown: 2,

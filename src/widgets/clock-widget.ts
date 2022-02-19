@@ -20,7 +20,7 @@ export class ClockWidget extends FilledRectangle {
         // const secs = String(this.time.getSeconds()).padStart(2, '0');
 
         const text = `${hours}${this.showSeparator ? ':' : ' '}${mins}`;
-        console.log(`  ${this.constructor.name} Drawing text: ${text}`);
+        // console.log(`  ${this.constructor.name} Drawing text: ${text}`);
 
         const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
 
@@ -33,7 +33,7 @@ export class ClockWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        console.log(`  ${this.constructor.name} Drawing done`);
+        // console.log(`  ${this.constructor.name} Drawing done`);
     }
 
     public override activate(): void {
