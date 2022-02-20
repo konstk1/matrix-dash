@@ -3,9 +3,9 @@ import 'dotenv/config';
 import { matrix } from './src/matrix';
 // import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
-import { FilledRectangle } from './src/widgets/widget';
 import { WeatherWidget } from './src/widgets/weather-widget';
 import { ClockWidget } from './src/widgets/clock-widget';
+import { TextWidget } from './src/widgets/text-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -34,12 +34,9 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
         const weather = new WeatherWidget({ width: 32, height: 16 }, 0);
         page1.addWidget(weather, { x: 32, y: 0 });
 
-        const rect2 = new FilledRectangle({ width: 32, height: 16 }, 1);
-        page1.addWidget(rect2, { x: 32, y: 16 });
-
-        const rect3 = new FilledRectangle({ width: 32, height: 16 }, 1);
-        // rect3.fgColor = 0xFF00FF;
-        page1.addWidget(rect3, { x: 0, y: 16 });
+        const message = new TextWidget({ width: 64, height: 16 }, 0);
+        message.setText(' 10 Amherst');
+        page1.addWidget(message, { x: 0, y: 16 });
 
         page1.activate();
 
@@ -47,7 +44,7 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
         while (true) {
             await sleep(1000);
         }
-        
+
         page1.deactivate();
     } catch (error) {
         console.error(error);

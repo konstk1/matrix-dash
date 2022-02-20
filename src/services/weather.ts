@@ -21,11 +21,20 @@ export class Weather {
 
     public async getWeather(): Promise<WeatherData> {
         const url = `${this.apiUrl}?lat=${this.coords.lat}&lon=${this.coords.lon}&exclude={part}&appid=${this.apiKey}&units=imperial`;
-        const response = await axios.get(url);
-        const current = response.data.current;
-        return {
-            tempF: current.temp,
-            humidity: current.humidity
+
+        try {
+            const response = await axios.get(url);
+            const current = response.data.current;
+            return {
+                tempF: current.temp,
+                humidity: current.humidity
+            };
+        } catch (error) {
+            console.log(`Error getting weather: ${error}`);
+            return {
+                tempF: 0,
+                humidity: 0,
+            };
         }
     }
 };
