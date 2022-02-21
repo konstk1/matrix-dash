@@ -15,11 +15,14 @@ export class ClockWidget extends FilledRectangle {
 
         if (!this.matrix) { return; }
 
-        const hours = String(this.time.getHours() % 12).padStart(2, '0');
-        const mins = String(this.time.getMinutes()).padStart(2, '0');
+        let hours = this.time.getHours() % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+
+        const hourStr = String(hours).padStart(2, ' ');
+        const minStr = String(this.time.getMinutes()).padStart(2, '0');
         // const secs = String(this.time.getSeconds()).padStart(2, '0');
 
-        const text = `${hours}${this.showSeparator ? ':' : ' '}${mins}`;
+        const text = `${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`;
         // console.log(`  ${this.constructor.name} Drawing text: ${text}`);
 
         const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);

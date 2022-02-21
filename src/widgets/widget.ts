@@ -32,7 +32,7 @@ export abstract class Widget {
 
 export class FilledRectangle extends Widget {
     public draw(sync: boolean = true): void {
-        console.log(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
+        // console.log(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
 
         // skip actual drawing if testing (matrix undefined)
         if (!matrix) {
