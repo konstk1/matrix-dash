@@ -1,14 +1,28 @@
 import { FilledRectangle } from './widget';
 import { Font } from '../matrix';
 import { log } from '../log';
+import { FontInstance } from 'rpi-led-matrix';
 
 export class TextWidget extends FilledRectangle {
     public fontName: string =  '6x10';
+    public fontKerning = -1;
 
+    public scrollSpeed = 0;
+
+    private font: FontInstance
     private text = '';
+    private textOffset = 0;
+
+    protected override updateIntervalMs = 100;
+
+    constructor(size: { width: number, height: number }, border: number = 0) {
+        super(size, border);
+        this.font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
+    }
 
     public setText(text: string) {
         this.text = text;
+        this.textOffset = this.scrollSpeed == 0 ? this.origin.x + 2 : this.matrix.width();
         this.draw(true);
     }
 
@@ -17,18 +31,41 @@ export class TextWidget extends FilledRectangle {
 
         if (!this.matrix) { return; }
 
-        log.debug(`  ${this.constructor.name} Drawing text: ${this.text}`);
-        const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
-
+        log.debug(`  ${this.constructor.name} Drawing text: "${this.text}" at offset ${this.textOffset}`);
         this.matrix
-            .font(font)
+            .font(this.font)
             .fgColor(this.fgColor)
-            .drawText(this.text, this.origin.x + 2, this.origin.y + 2, -1);
+            .drawText(this.text, this.textOffset, this.origin.y + 2, this.fontKerning);
 
         if (sync) {
             this.matrix.sync();
         }
 
         // log.debug(`  ${this.constructor.name} Drawing done`);
+    }
+
+    private scroll(): void {
+        this.textOffset = this.textOffset - 1;
+        const textWidth = this.font.stringWidth(this.text, this.fontKerning)
+
+        if (this.textOffset < -textWidth) {
+            this.textOffset = this.matrix.width();
+        }
+
+        this.draw(true);
+    }
+
+    public override activate(): void {
+        log.verbose(`${this.constructor.name}: Activating`);
+        if (this.scrollSpeed != 0) {
+            this.timer = setInterval(this.scroll.bind(this), this.updateIntervalMs);
+        }
+    }
+
+    public override deactivate(): void {
+        log.verbose(`${this.constructor.name}: Deactivating`);
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
     }
 }

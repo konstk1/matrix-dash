@@ -1,4 +1,4 @@
-import { LedMatrix, LedMatrixInstance, GpioMapping, Font } from "rpi-led-matrix";
+import { LedMatrix, LedMatrixInstance, GpioMapping, Font, FontInstance } from "rpi-led-matrix";
 
 let matrix: LedMatrixInstance;
 
@@ -15,4 +15,4 @@ if (process.env.NODE_ENV !== 'test') {
     });
 }
 
-export { LedMatrixInstance, Font, matrix };
+export { LedMatrixInstance, Font, FontInstance, matrix };

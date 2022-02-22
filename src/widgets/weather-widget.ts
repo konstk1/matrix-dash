@@ -13,8 +13,6 @@ export class WeatherWidget extends FilledRectangle {
     private tempF = 0;
     private lastUpdated = new Date(0);
 
-    private timer?: NodeJS.Timer;
-
     public override draw(sync: boolean = true): void {
         super.draw(false);
 

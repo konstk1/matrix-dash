@@ -15,6 +15,11 @@ export abstract class Widget {
     // @ts-ignore
     protected matrix = matrix;
 
+    // @ts-ignore
+    protected readonly updateIntervalMs: number = 1000;
+    // @ts-ignore
+    protected timer?: NodeJS.Timer;
+
     constructor(size: Size, border: number = 0) {
         this.size = size;
         this.border = border;

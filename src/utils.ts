@@ -7,4 +7,5 @@ export enum Color {
     magenta = 0xFF00FF,
     cyan = 0x00FFFF,
     yellow = 0xFFFF00,
+    white = 0xFFFFFF,
 };

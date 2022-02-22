@@ -30,7 +30,9 @@ async function main() {
         page1.addWidget(weather, { x: 32, y: 0 });
 
         const message = new TextWidget({ width: 64, height: 16 }, 0);
+        // message.scrollSpeed = 1;
         message.setText(' 10 Amherst');
+        // message.setText('123456789012345');
         page1.addWidget(message, { x: 0, y: 16 });
 
         page1.activate();

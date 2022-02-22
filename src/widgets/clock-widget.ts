@@ -8,9 +8,6 @@ export class ClockWidget extends FilledRectangle {
     private time: Date = new Date();
     private showSeparator: boolean = false;
 
-    private readonly updateIntervalMs: number = 1000;
-    private timer?: NodeJS.Timer;
-
     public override draw(sync: boolean = true): void {
         super.draw(false);
 
