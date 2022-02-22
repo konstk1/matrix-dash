@@ -1,5 +1,6 @@
 import { FilledRectangle } from './widget';
 import { Font } from '../matrix';
+import { log } from '../log';
 
 export class ClockWidget extends FilledRectangle {
     public fontName: string =  '6x10';
@@ -23,7 +24,7 @@ export class ClockWidget extends FilledRectangle {
         // const secs = String(this.time.getSeconds()).padStart(2, '0');
 
         const text = `${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`;
-        // console.log(`  ${this.constructor.name} Drawing text: ${text}`);
+        // log.debug(`  ${this.constructor.name} Drawing text: ${text}`);
 
         const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
 
@@ -36,11 +37,11 @@ export class ClockWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        // console.log(`  ${this.constructor.name} Drawing done`);
+        // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 
     public override activate(): void {
-        console.log(`${this.constructor.name}: Activating`);
+        log.verbose(`${this.constructor.name}: Activating`);
         this.timer = setInterval(() => {
             this.time = new Date();
             this.showSeparator = !this.showSeparator;
@@ -49,7 +50,7 @@ export class ClockWidget extends FilledRectangle {
     }
 
     public override deactivate(): void {
-        console.log(`${this.constructor.name}: Deactivating`);
+        log.verbose(`${this.constructor.name}: Deactivating`);
         if (this.timer) {
             clearInterval(this.timer);
         }

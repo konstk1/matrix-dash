@@ -1,5 +1,6 @@
 import { matrix } from './matrix';
 import { Widget, Coordinates } from './widgets/widget';
+import { log } from './log';
 
 export class Page {
     public title: string;
@@ -17,7 +18,7 @@ export class Page {
     }
 
     public draw() {
-        console.log(`Drawing page ${this.title}`);
+        log.verbose(`Drawing page ${this.title}`);
         this.widgets.forEach(widget => {
             widget.draw(false);
         });

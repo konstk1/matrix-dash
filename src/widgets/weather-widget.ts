@@ -2,6 +2,7 @@ import { FilledRectangle } from './widget';
 import { Font } from '../matrix';
 import { Weather } from '../services/weather';
 import { Color } from '../utils';
+import { log } from '../log';
 
 export class WeatherWidget extends FilledRectangle {
     public fontName: string =  '6x10';
@@ -23,7 +24,7 @@ export class WeatherWidget extends FilledRectangle {
         
         const tempStr = `+${this.tempF}`;
         const tempStrLen = font.stringWidth(tempStr, this.fontKerning);
-        // console.log(`  ${this.constructor.name} Drawing text: ${text}`);
+        // log.debug(`  ${this.constructor.name} Drawing text: ${text}`);
 
         const now = new Date();
         const elapsedMin = (now.getTime() - this.lastUpdated.getTime()) / 1000 / 60;
@@ -38,7 +39,7 @@ export class WeatherWidget extends FilledRectangle {
             .fgColor(this.fgColor)
             .drawText(tempStr, startX, startY, this.fontKerning)
             .fgColor(degColor)
-            .drawText('°', startX + tempStrLen, startY, this.fontKerning)
+            .drawText('°', startX + tempStrLen - 1, startY, this.fontKerning) // -1 to push deg symbol closer to the number
             .fgColor(this.fgColor)
             .drawText('F', startX + tempStrLen + font.stringWidth(' ', this.fontKerning), startY, this.fontKerning);
 
@@ -46,30 +47,30 @@ export class WeatherWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        // console.log(`  ${this.constructor.name} Drawing done`);
+        // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 
     private async updateWeather() {
         try {
-            console.log('Fetching weather...');
             const current = await this.weather.getWeather();
             this.tempF = Math.round(current.tempF);
             this.lastUpdated = new Date();
+            log.verbose(`Fetched weather... ${this.tempF}F at ${current.timestamp.toLocaleString()}`);
         } catch (error) {
-            console.log('Error getting weather:', error);
+            log.error('Error getting weather:', error);
         }
 
         this.draw(true);
     }
 
     public override activate(): void {
-        console.log(`${this.constructor.name}: Activating`);
+        log.verbose(`${this.constructor.name}: Activating`);
         this.updateWeather();
         this.timer = setInterval(this.updateWeather.bind(this), this.updateIntervalSec * 1000);
     }
 
     public override deactivate(): void {
-        console.log(`${this.constructor.name}: Deactivating`);
+        log.verbose(`${this.constructor.name}: Deactivating`);
         if (this.timer) {
             clearInterval(this.timer);
         }

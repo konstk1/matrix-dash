@@ -5,6 +5,7 @@ it('fetches weather', async () => {
 
     const current = await weather.getWeather();
 
+    expect(current.timestamp).toBeInstanceOf(Date);
     expect(current.tempF).toBeGreaterThan(-20);
     expect(current.tempF).toBeLessThan(110);
     expect(current.humidity).toBeGreaterThan(0);

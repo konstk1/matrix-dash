@@ -1,4 +1,5 @@
 import { matrix } from '../matrix';
+import { log } from '../log';
 
 export type Coordinates = { x: number, y: number };
 export type Size = { width: number, height: number };
@@ -22,17 +23,17 @@ export abstract class Widget {
     public abstract draw(sync: boolean): void;
 
     public activate(): void {
-        console.log(`${this.constructor.name}: activate not implemented`);
+        log.warn(`${this.constructor.name}: activate not implemented`);
     }
 
     public deactivate(): void {
-        console.log(`${this.constructor.name}: deactivate not implemented`);
+        log.warn(`${this.constructor.name}: deactivate not implemented`);
     }
 }
 
 export class FilledRectangle extends Widget {
     public draw(sync: boolean = true): void {
-        // console.log(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
+        // log.debug(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
 
         // skip actual drawing if testing (matrix undefined)
         if (!matrix) {

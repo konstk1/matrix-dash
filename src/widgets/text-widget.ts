@@ -1,5 +1,6 @@
 import { FilledRectangle } from './widget';
 import { Font } from '../matrix';
+import { log } from '../log';
 
 export class TextWidget extends FilledRectangle {
     public fontName: string =  '6x10';
@@ -16,7 +17,7 @@ export class TextWidget extends FilledRectangle {
 
         if (!this.matrix) { return; }
 
-        console.log(`  ${this.constructor.name} Drawing text: ${this.text}`);
+        log.debug(`  ${this.constructor.name} Drawing text: ${this.text}`);
         const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
 
         this.matrix
@@ -28,6 +29,6 @@ export class TextWidget extends FilledRectangle {
             this.matrix.sync();
         }
 
-        // console.log(`  ${this.constructor.name} Drawing done`);
+        // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 }

@@ -1,22 +1,22 @@
 
 import 'dotenv/config';
 import { matrix } from './src/matrix';
-// import { Font } from 'rpi-led-matrix';
 import { Page } from './src/page';
 import { WeatherWidget } from './src/widgets/weather-widget';
 import { ClockWidget } from './src/widgets/clock-widget';
 import { TextWidget } from './src/widgets/text-widget';
+import { log } from './src/log';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 process.on("SIGINT", function() {
-    console.log("SIGINT");
+    log.warn("SIGINT, exiting...");
     process.exit(0);
 });
 
-(async () => {
+async function main() {
     try {
-        console.log('Matrix dash starting...');
+        log.verbose('Matrix dash starting...');
 
         matrix && matrix.brightness(20);
 
@@ -35,7 +35,6 @@ process.on("SIGINT", function() {
 
         page1.activate();
 
-        // console.log('Done');
         while (true) {
             await sleep(1000);
         }
@@ -44,6 +43,6 @@ process.on("SIGINT", function() {
     } catch (error) {
         console.error(error);
     }
-})();
+};
 
-
+main();

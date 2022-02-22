@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 export type WeatherData = {
+    timestamp: Date;
     tempF: number;
     humidity: number;
 }
@@ -25,6 +26,7 @@ export class Weather {
         const response = await axios.get(url);
         const current = response.data.current;
         return {
+            timestamp: new Date(current.dt * 1000),
             tempF: current.temp,
             humidity: current.humidity
         };
