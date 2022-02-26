@@ -31,7 +31,7 @@ async function main() {
 
         const message = new TextWidget({ width: 64, height: 16 }, 0);
         // message.scrollSpeed = 1;
-        message.setText(' 10 Amherst');
+        message.setText('');
         // message.setText('123456789012345');
         page1.addWidget(message, { x: 0, y: 16 });
 

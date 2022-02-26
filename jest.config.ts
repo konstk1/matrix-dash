@@ -8,6 +8,9 @@ const config: Config.InitialOptions = {
     setupFiles: [
       'dotenv/config',
     ],
+    setupFilesAfterEnv: [
+      '<rootDir>/test/jest.setup.ts',
+    ]
 };
 
 export default config;
