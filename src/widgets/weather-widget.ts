@@ -24,11 +24,6 @@ export class WeatherWidget extends FilledRectangle {
         const tempStrLen = font.stringWidth(tempStr, this.fontKerning);
         // log.debug(`  ${this.constructor.name} Drawing text: ${text}`);
 
-        const now = new Date();
-        const elapsedMin = (now.getTime() - this.lastUpdated.getTime()) / 1000 / 60;
-        // if it's been more than 2 intervals since update, show red deg symbol, otherwise show green
-        const degColor = elapsedMin > (this.updateIntervalSec * 2) ? Color.red : Color.green;
-
         const startX = this.origin.x + 3;
         const startY = this.origin.y + 3;
 
@@ -36,10 +31,26 @@ export class WeatherWidget extends FilledRectangle {
             .font(font)
             .fgColor(this.fgColor)
             .drawText(tempStr, startX, startY, this.fontKerning)
-            .fgColor(degColor)
             .drawText('°', startX + tempStrLen - 1, startY, this.fontKerning) // -1 to push deg symbol closer to the number
-            .fgColor(this.fgColor)
             .drawText('F', startX + tempStrLen + font.stringWidth(' ', this.fontKerning), startY, this.fontKerning);
+
+        const topRight = {
+            x: this.origin.x + this.size.width - 1,
+            y: this.origin.y,
+        };
+
+        // draw triangle in top right to indicate update time
+
+        const now = new Date();
+        const elapsedMin = (now.getTime() - this.lastUpdated.getTime()) / 1000 / 60;
+        // if it's been more than 2 intervals since update, show red status, otherwise show green
+        const statusColor = elapsedMin > (this.updateIntervalSec * 2) ? Color.red : Color.green;
+
+        this.matrix
+            .fgColor(statusColor)
+            .drawLine(topRight.x - 2, topRight.y, topRight.x, topRight.y)
+            .drawLine(topRight.x - 1, topRight.y + 1, topRight.x, topRight.y + 1)
+            .drawLine(topRight.x, topRight.y + 2, topRight.x, topRight.y + 2)
 
         if (sync) {
             this.matrix.sync();
