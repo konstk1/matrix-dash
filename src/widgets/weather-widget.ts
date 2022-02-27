@@ -1,13 +1,10 @@
-import { FilledRectangle } from './widget';
-import { Font } from '../matrix';
+import { TextWidget } from './text-widget';
 import { Weather } from '../services/weather';
 import { Color } from '../utils';
 import { log } from '../log';
 
-export class WeatherWidget extends FilledRectangle {
-    public fontName: string =  '6x10';
-    public fontKerning = -1;
-    public updateIntervalSec = 5 * 60;
+export class WeatherWidget extends TextWidget {
+    protected override updateIntervalMs = 5 * 60 * 1000; // 5 mins
 
     private readonly weather = new Weather();
     private tempF = 0;
@@ -17,22 +14,20 @@ export class WeatherWidget extends FilledRectangle {
         super.draw(false);
 
         if (!this.matrix) { return; }
-
-        const font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`);
         
         const tempStr = `+${this.tempF}`;
-        const tempStrLen = font.stringWidth(tempStr, this.fontKerning);
+        const tempStrLen = this.font.stringWidth(tempStr, this.fontKerning);
         // log.debug(`  ${this.constructor.name} Drawing text: ${text}`);
 
-        const startX = this.origin.x + 3;
-        const startY = this.origin.y + 3;
+        const startX = this.origin.x + 2;
+        const startY = this.origin.y + 2;
 
         this.matrix
-            .font(font)
+            .font(this.font)
             .fgColor(this.fgColor)
             .drawText(tempStr, startX, startY, this.fontKerning)
             .drawText('°', startX + tempStrLen - 1, startY, this.fontKerning) // -1 to push deg symbol closer to the number
-            .drawText('F', startX + tempStrLen + font.stringWidth(' ', this.fontKerning), startY, this.fontKerning);
+            .drawText('F', startX + tempStrLen + this.font.stringWidth(' ', this.fontKerning), startY, this.fontKerning);
 
         const topRight = {
             x: this.origin.x + this.size.width - 1,
@@ -42,9 +37,9 @@ export class WeatherWidget extends FilledRectangle {
         // draw triangle in top right to indicate update time
 
         const now = new Date();
-        const elapsedMin = (now.getTime() - this.lastUpdated.getTime()) / 1000 / 60;
+        const elapsedMs = (now.getTime() - this.lastUpdated.getTime());
         // if it's been more than 2 intervals since update, show red status, otherwise show green
-        const statusColor = elapsedMin > (this.updateIntervalSec * 2) ? Color.red : Color.green;
+        const statusColor = elapsedMs > (2 * this.updateIntervalMs) ? Color.red : Color.green;
 
         this.matrix
             .fgColor(statusColor)
@@ -59,7 +54,7 @@ export class WeatherWidget extends FilledRectangle {
         // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 
-    private async updateWeather() {
+    protected override async update() {
         try {
             const current = await this.weather.getWeather();
             this.tempF = Math.round(current.tempF);
@@ -70,18 +65,5 @@ export class WeatherWidget extends FilledRectangle {
         }
 
         this.draw(true);
-    }
-
-    public override activate(): void {
-        log.verbose(`${this.constructor.name}: Activating`);
-        this.updateWeather();
-        this.timer = setInterval(this.updateWeather.bind(this), this.updateIntervalSec * 1000);
-    }
-
-    public override deactivate(): void {
-        log.verbose(`${this.constructor.name}: Deactivating`);
-        if (this.timer) {
-            clearInterval(this.timer);
-        }
     }
 }

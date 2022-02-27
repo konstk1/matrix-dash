@@ -15,9 +15,7 @@ export abstract class Widget {
     // @ts-ignore
     protected matrix = matrix;
 
-    // @ts-ignore
-    protected readonly updateIntervalMs: number = 1000;
-    // @ts-ignore
+    protected updateIntervalMs: number = 0;
     protected timer?: NodeJS.Timer;
 
     constructor(size: Size, border: number = 0) {
@@ -25,18 +23,6 @@ export abstract class Widget {
         this.border = border;
     }
 
-    public abstract draw(sync: boolean): void;
-
-    public activate(): void {
-        log.warn(`${this.constructor.name}: activate not implemented`);
-    }
-
-    public deactivate(): void {
-        log.warn(`${this.constructor.name}: deactivate not implemented`);
-    }
-}
-
-export class FilledRectangle extends Widget {
     public draw(sync: boolean = true): void {
         // log.debug(`  ${this.constructor.name} drawing from {${this.origin.x}, ${this.origin.y}} to {${this.origin.x + this.size.width}, ${this.origin.y + this.size.height}}`);
 
@@ -59,4 +45,26 @@ export class FilledRectangle extends Widget {
             matrix.sync();
         }
     }
+
+    protected update(): void {
+        this.draw(true);
+    }
+
+    // default activation is timer based
+    public activate(): void {
+        log.warn(`${this.constructor.name}: activate widget`);
+        this.update();
+
+        if (this.updateIntervalMs > 0) {
+            this.timer = setInterval(this.update.bind(this), this.updateIntervalMs);
+        }
+    }
+
+    public deactivate(): void {
+        log.warn(`${this.constructor.name}: deactivate widget`);
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+    }
 }
+
