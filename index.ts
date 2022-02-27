@@ -4,7 +4,7 @@ import { matrix } from './src/matrix';
 import { Page } from './src/page';
 import { WeatherWidget } from './src/widgets/weather-widget';
 import { ClockWidget } from './src/widgets/clock-widget';
-import { TextWidget } from './src/widgets/text-widget';
+import { RouterWidget } from './src/widgets/router-widget';
 import { log } from './src/log';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -29,11 +29,8 @@ async function main() {
         const weather = new WeatherWidget({ width: 32, height: 16 }, 0);
         page1.addWidget(weather, { x: 32, y: 0 });
 
-        const message = new TextWidget({ width: 64, height: 16 }, 0);
-        // message.scrollSpeed = 1;
-        message.setText('');
-        // message.setText('123456789012345');
-        page1.addWidget(message, { x: 0, y: 16 });
+        const router = new RouterWidget({ width: 64, height: 16 }, 0);
+        page1.addWidget(router, { x: 0, y: 16 });
 
         page1.activate();
 

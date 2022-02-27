@@ -18,7 +18,7 @@ export class ClockWidget extends TextWidget {
         const minStr = String(this.time.getMinutes()).padStart(2, '0');
         // const secs = String(this.time.getSeconds()).padStart(2, '0');
 
-        this.text = `${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`;
+        this.text = ` ${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`;
     
         super.update();
     }
