@@ -2,7 +2,12 @@ import { EdgeMax } from '../src/services/edgemax';
 
 const edgemax = new EdgeMax(process.env.EDGEMAX_HOST || '192.168.1.1');
 
-it('Fetches get.json', async () => {
+it('Logs in', async () => {
     await edgemax.login();
-    await edgemax.getInfo();
+    expect(edgemax.isLoggedIn()).toEqual(true);
+
+    const result = await edgemax.getInfo();
+    expect(result.success).toEqual(true);
+
+    await edgemax.connectWebsocket();
 });
