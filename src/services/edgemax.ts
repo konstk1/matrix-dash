@@ -80,6 +80,14 @@ export class EdgeMax {
         });
 
         this.axios.defaults.headers.common['cookie'] = `beaker.session.id=${this.sessionId}; X-CSRF-TOKEN=${this.csrfToken}`;
+
+        // periodically call heartbeat to keep the session alive
+        setInterval(this.heartBeat.bind(this), 1000 * 60 * 10);
+    }
+
+    public async heartBeat(): Promise<void> {
+        const response = await this.axios.get(`api/edge/heartbeat.json?t=${Date.now()}`);
+        log.verbose('EdgeMax heart beat: %O', response.data);
     }
 
     public async getInfo(): Promise<any> {
@@ -140,8 +148,8 @@ export class EdgeMax {
             this.incomingLength = 0;
 
             this.onStats({
-                rx_bps: message.interfaces.eth0.stats.rx_bps,
-                tx_bps: message.interfaces.eth0.stats.tx_bps,
+                rxBps: message.interfaces.eth0.stats.rx_bps,
+                txBps: message.interfaces.eth0.stats.tx_bps,
             });
         }
     }

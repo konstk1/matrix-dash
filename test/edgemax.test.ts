@@ -9,10 +9,12 @@ it('Logs in', async () => {
     const result = await edgemax.getInfo();
     expect(result.success).toEqual(true);
 
+    await edgemax.heartBeat();
+
     await edgemax.connectWebsocket();
 
     edgemax.onStats = (stats: any) => {
-        console.log('tx bps: ', stats.tx_bps);
-        console.log('rx bps: ', stats.rx_bps);
+        console.log('tx bps: ', stats.txBps);
+        console.log('rx bps: ', stats.rxBps);
     }
 });
