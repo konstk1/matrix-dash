@@ -127,7 +127,8 @@ export class EdgeMax {
     }
 
     private onWsDisconnect() {
-        log.info('Websocket disconnected');
+        log.info('Websocket disconnected, reconnecting...');
+        this.connectWebsocket();
     }
 
     private onWsMessage(data: string) {
