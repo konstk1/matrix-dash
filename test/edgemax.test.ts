@@ -16,5 +16,9 @@ it('Logs in', async () => {
     edgemax.onStats = (stats: any) => {
         console.log('tx bps: ', stats.txBps);
         console.log('rx bps: ', stats.rxBps);
+        const text = `↑${1000}${'k'} ↑${1000}${'m'}`;
+        const buff = Buffer.from(text, 'utf8');
+        console.log('text: ', text.length);
+        console.log('buff: ', buff.length);
     }
 });

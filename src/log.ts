@@ -13,10 +13,14 @@ export const log: winston.Logger = winston.createLogger({
     transports: [
         new winston.transports.Console({}),
         new winston.transports.File({ 
-            filename: 'log.txt',
+            filename: 'logs/all.log',
             options: { flags: 'w' }, // overwrite log file on start 
         }),
-        // new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({
+            filename: 'logs/warn.log', 
+            level: 'warn',
+            options: { flags: 'w' }, // overwrite log file on start 
+        }),
     ],
 });
 
