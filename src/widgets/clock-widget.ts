@@ -7,6 +7,9 @@ export class ClockWidget extends TextWidget {
     private showSeparator: boolean = false;
 
     // @ts-ignore
+    protected override textOffset = 3;
+
+    // @ts-ignore
     protected override update(): void {
         this.time = new Date();
         this.showSeparator = !this.showSeparator;
@@ -18,7 +21,7 @@ export class ClockWidget extends TextWidget {
         const minStr = String(this.time.getMinutes()).padStart(2, '0');
         // const secs = String(this.time.getSeconds()).padStart(2, '0');
 
-        this.text = ` ${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`;
+        this.setText(`${hourStr}${this.showSeparator ? ':' : ' '}${minStr}`);
     
         super.update();
     }

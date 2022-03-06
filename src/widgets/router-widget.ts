@@ -26,10 +26,10 @@ export class RouterWidget extends TextWidget {
                 down = down / 1024;
             }
 
-            const upStr = String(Math.round(up)).padStart(4, ' ');
-            const downStr = String(Math.round(down)).padStart(4, ' ');
+            const upStr = String(Math.round(up)).padStart(3, ' ');
+            const downStr = String(Math.round(down)).padStart(3, ' ');
 
-            this.text = `↑${upStr}${upUnits} ${downStr}${downUnits}`;
+            this.setText(`↑${upStr}${upUnits} ↓${downStr}${downUnits}`);
             this.draw(true);
         };
     }

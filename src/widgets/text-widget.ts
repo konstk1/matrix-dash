@@ -9,10 +9,14 @@ export class TextWidget extends Widget {
 
     public scrollSpeed = 0;
     
-    protected text = '';
+    // @ts-ignore
+    private text = '';
     protected font: FontInstance
 
-    private textOffset = 0;
+    private textSegments: string[] = [];
+    private segmentSize = 4;
+
+    protected textOffset = 0;
 
     constructor(size: { width: number, height: number }, border: number = 0) {
         super(size, border);
@@ -21,7 +25,15 @@ export class TextWidget extends Widget {
 
     public setText(text: string) {
         this.text = text;
-        this.textOffset = this.scrollSpeed == 0 ? this.origin.x + 2 : this.matrix.width();
+        this.textSegments = [];
+        // log.debug('Splitting text: ', text);
+        while (text) {
+            this.textSegments.push(text.substring(0, this.segmentSize));
+            text = text.substring(this.segmentSize);
+            // log.debug(`Segment '${this.textSegments[this.textSegments.length - 1]}', left: ${text}`);
+        }
+
+        this.textOffset = this.scrollSpeed == 0 ? this.origin.x + this.textOffset : this.matrix.width();
         this.draw(true);
     }
 
@@ -33,8 +45,15 @@ export class TextWidget extends Widget {
         // log.debug(`  ${this.constructor.name} Drawing text: "${this.text}" at offset ${this.textOffset}`);
         this.matrix
             .font(this.font)
-            .fgColor(this.fgColor)
-            .drawText(this.text, this.textOffset, this.origin.y + 2, this.fontKerning);
+            .fgColor(this.fgColor);
+
+        let offset = this.textOffset;
+
+
+        for (const segment of this.textSegments) {
+            this.matrix.drawText(segment, offset, this.origin.y + 2, this.fontKerning);
+            offset = offset + this.font.stringWidth(segment, this.fontKerning);
+        }
 
         if (sync) {
             this.matrix.sync();
@@ -44,21 +63,23 @@ export class TextWidget extends Widget {
     }
 
     // @ts-ignore
-    // protected override update(): void {
-    //     this.textOffset = this.textOffset - 1;
-    //     const textWidth = this.font.stringWidth(this.text, this.fontKerning)
+    protected override update(): void {
+        if (this.scrollSpeed != 0) {
+            this.textOffset = this.textOffset - 1;
+            const textWidth = this.font.stringWidth(this.text, this.fontKerning)
 
-    //     if (this.textOffset < -textWidth) {
-    //         this.textOffset = this.matrix.width();
-    //     }
+            if (this.textOffset < -textWidth) {
+                this.textOffset = this.matrix.width();
+            }
+        }
 
-    //     this.draw(true);
-    // }
+        this.draw(true);
+    }
 
     public override activate(): void {
         log.verbose(`${this.constructor.name}: Activating`);
         if (this.scrollSpeed != 0) {
-           this.updateIntervalMs = 100;
+           this.updateIntervalMs = 80;
         }
         super.activate();
     }
