@@ -15,6 +15,15 @@ import { log } from './src/log';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+// @ts-ignore
+function babyBrotherAge() {
+    const today = new Date();
+    const birthDate = new Date('2022-04-26');
+    const timeDiff = Math.abs(birthDate.getTime() - today.getTime());
+    const diffDays = Math.floor(timeDiff / (1000 * 3600 * 24));
+    return diffDays;
+}
+
 process.on("SIGINT", function() {
     log.warn("SIGINT, exiting...");
     process.exit(0);
@@ -24,7 +33,7 @@ async function main() {
     try {
         log.verbose('Matrix dash starting...');
 
-        matrix && matrix.brightness(10);
+        matrix && matrix.brightness(20);
 
         const page1 = new Page('page1');
 
@@ -42,10 +51,14 @@ async function main() {
         // page1.addWidget(buffer, { x: 0, y: 16 });
 
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
-        scroller.setText('Maya needs a bath today');
+        scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
         scroller.scrollSpeed = 1;
-        scroller.fgColor = 0xFF00FF;
+        scroller.fgColor = 0x5555FF;
         page1.addWidget(scroller, { x: 0, y: 16 });
+
+        setInterval(() => {
+            scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
+        }, 1000 * 3600 * 6);
 
         page1.activate();
 

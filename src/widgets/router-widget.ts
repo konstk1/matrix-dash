@@ -29,7 +29,7 @@ export class RouterWidget extends TextWidget {
             const upStr = String(Math.round(up)).padStart(3, ' ');
             const downStr = String(Math.round(down)).padStart(3, ' ');
 
-            this.setText(`↑${upStr}${upUnits} ↓${downStr}${downUnits}`);
+            this.setText(` ↑${upStr}${upUnits} ↓${downStr}${downUnits}`);
             this.draw(true);
         };
     }
