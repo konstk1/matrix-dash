@@ -54,7 +54,7 @@ async function main() {
         scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
         scroller.scrollSpeed = 1;
         // scroller.fgColor = 0x5555FF;
-        scroller.fgColor = 0x008080;
+        scroller.fgColor = 0xeb9b34;
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(() => {
