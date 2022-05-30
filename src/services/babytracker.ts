@@ -2,8 +2,10 @@ import axios, { AxiosInstance } from 'axios';
 // import * as fs from 'fs';
 import { log } from '../log';
 
+type UUID = string;
+
 type DeviceInfo = {
-    DeviceUUID: string,
+    DeviceUUID: UUID,
     LastSyncID: number,
     DeviceName: string,
     DeviceOSInfo: string,
@@ -14,6 +16,7 @@ type EventInfo = {
     opCode: number, // 0-create, 1-update, 2-delete
     type: string,
     time: Date,
+    baby: string,
 }
 
 export class BabyTracker {
@@ -28,7 +31,10 @@ export class BabyTracker {
     private readonly axios: AxiosInstance;
     private cookies?: string[] = [];
 
-    private localDeviceInfo: DeviceInfo[] = [];
+    private localDeviceInfo: {[key: UUID]: DeviceInfo} = {};
+
+    private newEvents: EventInfo[] = [];
+    lastFeedingTime: Date = new Date(0);
 
     constructor() {
         if (!this.email || !this.password) {
@@ -75,28 +81,30 @@ export class BabyTracker {
         return res.data;
     }
 
-    async fetchSyncInfo(): Promise<DeviceInfo[]> {
+    async sync() {
         const res = await this.axios.get(`${this.baseUrl}/account/device`);
 
         if (res.status !== 200) {
             log.error('Baby tracker failed to get devices')
         }
 
-        // console.log(res.data);
 
-        return res.data;
-    }
-
-    async sync() {
-        const remoteDeviceInfo = await this.fetchSyncInfo();
+        const remoteDeviceInfo = res.data;
 
         for (const remoteDevice of remoteDeviceInfo) {
+            // if (!remoteDevice.DeviceUUID.includes('9E33F0E7')) continue;
+            // if (remoteDevice.DeviceUUID != 'C73C5794-1189-419E-9B24-37056AE4D29D') continue;
+
             const numToSync = this.calcSyncDiff(remoteDevice);
             if (numToSync > 0) {
-                log.info(`Syncing ${numToSync} events for ${remoteDevice.DeviceUUID} (${remoteDevice.DeviceName})`);
+                log.info(`Syncing ${remoteDevice.DeviceUUID.substring(0,8)} (${remoteDevice.DeviceName}): ${numToSync} events [${remoteDevice.LastSyncID - numToSync + 1} - ${remoteDevice.LastSyncID}]`);
                 await this.syncDevice(remoteDevice, numToSync);
             }
-        } 
+        }
+
+        let eventTypes = [...new Set(this.newEvents.map(e => e.type))];
+        log.verbose(`Sync complete, found ${eventTypes.length} event types: [${eventTypes}]`);
+        log.info(`Most recent feeding at ${this.lastFeedingTime.toLocaleString()}`);
     }
 
     async syncDevice(remoteDevice: DeviceInfo, numToSync: number) {
@@ -109,12 +117,21 @@ export class BabyTracker {
             return;
         }
 
-        const events = this.parseTransactions(res.data);
-        console.log(events);
+        const events = this.parseTransactions(res.data).filter(e => e.baby === 'Kai');
+        // console.log(events);
+
+        // update local sync state
+        this.localDeviceInfo[remoteDevice.DeviceUUID] = remoteDevice;
+
+        // save events to local storage
+        this.newEvents.push(...events);
+
+        // look for feed events
+        this.findFeedings(events);
     }
 
     calcSyncDiff(remoteDevice: DeviceInfo): number {
-        const localDevice = this.localDeviceInfo.find(d => d.DeviceUUID === remoteDevice.DeviceUUID);
+        const localDevice = this.localDeviceInfo[remoteDevice.DeviceUUID];
         if (!localDevice) {
             return Math.min(this.maxEventsLookback, remoteDevice.LastSyncID);
         }
@@ -125,22 +142,38 @@ export class BabyTracker {
     }
 
     async saveSyncInfo() {
-
+        // TODO: Save local sync state to disk
     }
 
     parseTransactions(transactions: any[]): EventInfo[] {
         return transactions.map(t => {
             // base64 decode the data
             const obj = JSON.parse(Buffer.from(t.Transaction, 'base64').toString('utf8'));
-            console.log('obj :>> ', obj);
+            // console.log('obj :>> ', obj);
 
             return {
                 syncID: t.SyncID,
                 opCode: t.OPCode,
                 type: obj.BCObjectType,
                 time: new Date(obj.time),
-                baby: obj.baby.name,
+                baby: obj.baby?.name || '',
             };
         });
+    }
+
+    findFeedings(events: EventInfo[]) {
+        const feedings: EventInfo[] = [];
+        for (const event of events) {
+            if (event.type === 'Nursing' || event.type === 'Pumped' || 
+                event.type === 'OtherFeed' || event.type === 'Formula') {
+                feedings.push(event);
+                // update last feeding time
+                if (event.time > this.lastFeedingTime) {
+                    log.info(`Found more recent feeding (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+                    this.lastFeedingTime = event.time;
+                }
+            }
+        }
+        // console.log(feedings);
     }
 };

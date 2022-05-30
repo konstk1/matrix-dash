@@ -11,6 +11,7 @@ import { RouterWidget } from './src/widgets/router-widget';
 // @ts-ignore
 import { TextWidget } from './src/widgets/text-widget';
 import { log } from './src/log';
+import { BabyTracker } from './src/services/babytracker';
 // import { BufferWidget } from './src/widgets/buffer-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -19,9 +20,23 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 function babyBrotherAge() {
     const today = new Date();
     const birthDate = new Date('2022-04-26');
-    const timeDiff = Math.abs(birthDate.getTime() - today.getTime());
+    const timeDiff = today.getTime() - birthDate.getTime();
     const diffDays = Math.floor(timeDiff / (1000 * 3600 * 24));
     return diffDays;
+}
+
+const bt = new BabyTracker();
+
+async function getLastFeed() {
+    await bt.sync();
+    const now = new Date();
+    const timeDiff = now.getTime() - bt.lastFeedingTime.getTime();
+
+    // split into hours
+    const diffHours = Math.floor(timeDiff / (1000 * 3600));
+    // get remaining minutes
+    const diffMinutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
+    return `${diffHours}h ${diffMinutes}m`;
 }
 
 process.on("SIGINT", function() {
@@ -30,6 +45,7 @@ process.on("SIGINT", function() {
 });
 
 async function main() {
+    await bt.login();
     try {
         log.verbose('Matrix dash starting...');
 
@@ -52,14 +68,15 @@ async function main() {
 
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
         scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        scroller.scrollSpeed = 1;
+        // scroller.scrollSpeed = 1;
         // scroller.fgColor = 0x5555FF;
         scroller.fgColor = 0xeb9b34;
         page1.addWidget(scroller, { x: 0, y: 16 });
 
-        setInterval(() => {
-            scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        }, 1000 * 3600 * 6);
+        setInterval(async () => {
+            scroller.setText(` ${await getLastFeed()} ago`);
+        }, 1000 * 60 * 5);
+        // }, 1000 * 3600 * 6);
 
         page1.activate();
 
