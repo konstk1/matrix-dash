@@ -13,6 +13,8 @@ import { TextWidget } from './src/widgets/text-widget';
 import { log } from './src/log';
 import { BabyTracker } from './src/services/babytracker';
 // import { BufferWidget } from './src/widgets/buffer-widget';
+// @ts-ignore
+import { TimerWidget } from './src/widgets/timer-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -27,6 +29,7 @@ function babyBrotherAge() {
 
 const bt = new BabyTracker();
 
+// @ts-ignore
 async function getLastFeed() {
     await bt.sync();
     const now = new Date();
@@ -77,6 +80,10 @@ async function main() {
             scroller.setText(` ${await getLastFeed()} ago`);
         }, 1000 * 60 * 5);
         // }, 1000 * 3600 * 6);
+
+        // const timer = new TimerWidget({ width: 64, height: 16 }, 0);
+        // page1.addWidget(timer, { x: 0, y: 16 });
+        // timer.start(12);
 
         page1.activate();
 
