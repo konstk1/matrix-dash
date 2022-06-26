@@ -180,7 +180,13 @@ export class BabyTracker {
                 if (event.time > this.lastFeedingTime) {
                     log.info(`Found more recent feeding (ID ${event.syncID}): ${event.time.toLocaleString()}`)
                     this.lastFeedingTime = event.time;
-                    this.lastStartSide = event.startSide;
+                    
+                    // if feeding is not nursing, append stars to indicate number of feeds since last nursing
+                    if (event.type === 'Nursing') {
+                        this.lastStartSide = event.startSide;
+                    } else {
+                        this.lastStartSide += '*';
+                    }
                 }
             }
         }
