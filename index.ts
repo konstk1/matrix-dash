@@ -39,7 +39,7 @@ async function getLastFeed() {
     const diffHours = Math.floor(timeDiff / (1000 * 3600));
     // get remaining minutes
     const diffMinutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-    return `${diffHours}h ${diffMinutes}m`;
+    return `${diffHours}h ${diffMinutes}m  ${bt.lastStartSide}`;
 }
 
 process.on("SIGINT", function() {
@@ -70,20 +70,21 @@ async function main() {
         // page1.addWidget(buffer, { x: 0, y: 16 });
 
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
-        scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
+        // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
+        scroller.setText(` ${await getLastFeed()}`);
         // scroller.scrollSpeed = 1;
         // scroller.fgColor = 0x5555FF;
-        scroller.fgColor = 0xeb9b34;
+        scroller.fgColor = 0xeb9b34; // orange
+        // scroller.fgColor = 0x00FF00; // green
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(async () => {
-            scroller.setText(` ${await getLastFeed()} ago`);
+            scroller.setText(` ${await getLastFeed()}`);
         }, 1000 * 60 * 5);
-        // }, 1000 * 3600 * 6);
 
         // const timer = new TimerWidget({ width: 64, height: 16 }, 0);
         // page1.addWidget(timer, { x: 0, y: 16 });
-        // timer.start(12);
+        // timer.start(60*36);
 
         page1.activate();
 

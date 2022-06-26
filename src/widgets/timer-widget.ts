@@ -4,8 +4,8 @@ import { log } from '../log';
 
 export class TimerWidget extends Widget {
 
-    public override fgColor = 0xFFFFFF;
-    public override bgColor = 0xFF00FF;
+    public override fgColor = 0xA52A2A;
+    public override bgColor = 0x000000;
 
     private durationMs = 0;
     private startTime: Date = new Date();

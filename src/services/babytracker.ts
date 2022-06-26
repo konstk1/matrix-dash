@@ -15,6 +15,7 @@ type EventInfo = {
     syncID: number,
     opCode: number, // 0-create, 1-update, 2-delete
     type: string,
+    startSide: string, // E-expressed, R-right, L-left
     time: Date,
     baby: string,
 }
@@ -35,6 +36,7 @@ export class BabyTracker {
 
     private newEvents: EventInfo[] = [];
     lastFeedingTime: Date = new Date(0);
+    lastStartSide = '';
 
     constructor() {
         if (!this.email || !this.password) {
@@ -151,10 +153,17 @@ export class BabyTracker {
             const obj = JSON.parse(Buffer.from(t.Transaction, 'base64').toString('utf8'));
             // console.log('obj :>> ', obj);
 
+            let startSide = 'E';    // assume Expressed unless Nursing below
+            if (obj.BCObjectType === 'Nursing') {
+                // 1 = Right, 2 = Left. So if finished on the left, started on the right
+                startSide = obj.finishSide === 2 ? 'R' : 'L';
+            }
+
             return {
                 syncID: t.SyncID,
                 opCode: t.OPCode,
                 type: obj.BCObjectType,
+                startSide: startSide,
                 time: new Date(obj.time),
                 baby: obj.baby?.name || '',
             };
@@ -171,6 +180,7 @@ export class BabyTracker {
                 if (event.time > this.lastFeedingTime) {
                     log.info(`Found more recent feeding (ID ${event.syncID}): ${event.time.toLocaleString()}`)
                     this.lastFeedingTime = event.time;
+                    this.lastStartSide = event.startSide;
                 }
             }
         }
