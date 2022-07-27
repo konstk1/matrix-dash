@@ -31,7 +31,17 @@ const bt = new BabyTracker();
 
 // @ts-ignore
 async function getLastFeed() {
-    await bt.sync();
+    try {
+        await bt.sync();
+    } catch (error) {
+        let errorMessage = "";
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        }
+        log.error('BT sync error:', errorMessage);
+        return 'BT error';
+    }
+
     const now = new Date();
     const timeDiff = now.getTime() - bt.lastFeedingTime.getTime();
 
