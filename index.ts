@@ -11,10 +11,13 @@ import { RouterWidget } from './src/widgets/router-widget';
 // @ts-ignore
 import { TextWidget } from './src/widgets/text-widget';
 import { log } from './src/log';
+// @ts-ignore
 import { BabyTracker } from './src/services/babytracker';
 // import { BufferWidget } from './src/widgets/buffer-widget';
 // @ts-ignore
 import { TimerWidget } from './src/widgets/timer-widget';
+// @ts-ignore
+import { CanvasWidget } from './src/widgets/canvas-widget';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -79,6 +82,7 @@ async function main() {
         // const buffer = new BufferWidget({ width: 64, height: 16 }, 0);
         // page1.addWidget(buffer, { x: 0, y: 16 });
 
+        
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
         // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
         scroller.setText(` ${await getLastFeed()}`);
@@ -91,6 +95,10 @@ async function main() {
         setInterval(async () => {
             scroller.setText(` ${await getLastFeed()}`);
         }, 1000 * 60 * 5);
+        
+
+    //    const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
+    //    page1.addWidget(canvas, { x: 0, y: 14 });
 
         // const timer = new TimerWidget({ width: 64, height: 16 }, 0);
         // page1.addWidget(timer, { x: 0, y: 16 });
