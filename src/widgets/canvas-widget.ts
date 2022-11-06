@@ -3,13 +3,22 @@ import { Widget, Size } from './widget';
 import { log } from '../log';
 
 type Rgb = { r: number, g: number, b: number };
+type Pixel = { 
+    x: number, 
+    y: number, 
+    color: Rgb,
+    startTime: Date,
+    durationMs: number,
+};
 
 export class CanvasWidget extends Widget {
 
     private canvas: Rgb[][] = [];
+    private pixels: Pixel[] = [];
 
-    protected override updateIntervalMs: number = 30;
+    protected override updateIntervalMs: number = 60;
 
+    // @ts-ignore
     private startTime: Date = new Date();
 
     constructor(size: Size, border: number = 0) {
@@ -24,12 +33,14 @@ export class CanvasWidget extends Widget {
 
         if (!this.matrix) { return; }
 
-        this.matrix.brightness(50);
+        // this.canvas.forEach((row, x) => {
+        //     row.forEach((rgb, y) => {
+        //         this.matrix.fgColor(rgb.r << 16 | rgb.g << 8 | rgb.b).setPixel(this.origin.x + x, this.origin.y + y);
+        //     })
+        // });
 
-        this.canvas.forEach((row, x) => {
-            row.forEach((rgb, y) => {
-                this.matrix.fgColor(rgb.r << 16 | rgb.g << 8 | rgb.b).setPixel(this.origin.x + x, this.origin.y + y);
-            })
+        this.pixels.forEach((p, i) => {
+            this.matrix.fgColor(p.color.r << 16 | p.color.g << 8 | p.color.b).setPixel(this.origin.x + p.x, this.origin.y + p.y);
         });
 
         if (sync) {
@@ -39,32 +50,65 @@ export class CanvasWidget extends Widget {
         // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 
-    protected override update(): void {
-        this.draw(true);
-        const tMs = new Date().getTime() - this.startTime.getTime();
-        const phase = -tMs * Math.PI / 1000;
+    private updatePixel(pixel: Pixel): Pixel | undefined {
+        const now = new Date();
+        const elapsedMs = now.getTime() - pixel.startTime.getTime();
 
-        for (let x = 0; x < this.size.width; x++) {
-            for (let y = 0; y < this.size.height; y++) {
-                const yy = this.size.height - 3 + Math.round(3 * Math.sin((x / Math.PI) + phase));
-                if (y == yy) {
-                    this.canvas[x][yy] = { r: 255, g: 0, b: 0 };
-                } else if (y > yy) {
-                    this.canvas[x][y] = { r: 0, g: 0, b: 0 };
-                } else if (Math.random() > ((y+1)/this.size.height/2)) {
-                    this.canvas[x][y] = { r: 0, g: 0, b: 0 };
-                } else {
-                    this.canvas[x][y] = { 
-                        r: Math.random() * 255, 
-                        g: Math.random() * 255, 
-                        b: Math.random() * 255,
-                    };
-                }
-            }
-            // const yy = this.size.height - 4 + Math.round(3 * Math.sin((x / Math.PI) + phase));
-            // this.canvas[x][yy] = { r: 255, g: 0, b: 0 };
+        if (elapsedMs < pixel.durationMs) {
+            pixel.color = {
+                r: 255 * (1 - elapsedMs / pixel.durationMs),
+                g: 255 * (1 - elapsedMs / pixel.durationMs),
+                b: 255 * (1 - elapsedMs / pixel.durationMs),
+            };
+            return pixel;
+        } else {
+            return undefined;
         }
+    }
 
+    protected override update(): void {
+        // @ts-ignore
+        const tMs = new Date().getTime() - this.startTime.getTime();
+
+        log.debug(`CanvasWidget.update() tMs ${tMs} ms`);
+        if (Math.random() < .99) {
+            // insert new pixel
+            const x = Math.floor(Math.random() * this.size.width);
+            const y = Math.floor(Math.random() * this.size.height);
+            const color: Rgb = { r: 255, g: 255, b: 255 };
+            const durationMs = 1000 + Math.floor(Math.random() * 2000);
+            const startTime = new Date();
+            log.debug(`Inserting new pixel (dur ${durationMs}), length: ${this.pixels.length}`);
+            this.pixels.push({ x, y, color, startTime, durationMs });
+        }
+        // const phase = -tMs * Math.PI / 1000;
+
+        for (let i = this.pixels.length - 1; i >= 0; i--) {
+            const updatedPixel = this.updatePixel(this.pixels[i]);
+            if (updatedPixel) {
+                this.canvas[updatedPixel.x][updatedPixel.y] = updatedPixel.color;
+            } else {
+                this.pixels.splice(i, 1);
+            }
+        };
+
+        // for (let x = 0; x < this.size.width; x++) {
+        //     for (let y = 0; y < this.size.height; y++) {
+        //         if (Math.random() > ((y+1)/this.size.height/2)) {
+        //             this.canvas[x][y] = { r: 0, g: 0, b: 0 };
+        //         } else {
+        //             this.canvas[x][y] = { 
+        //                 r: Math.random() * 255, 
+        //                 g: Math.random() * 255, 
+        //                 b: Math.random() * 255,
+        //             };
+        //         }
+        //     }
+        //     // const yy = this.size.height - 4 + Math.round(3 * Math.sin((x / Math.PI) + phase));
+        //     // this.canvas[x][yy] = { r: 255, g: 0, b: 0 };
+        // }
+
+        this.draw(true);
     }
 
     public override activate(): void {
