@@ -52,7 +52,7 @@ async function getLastFeed() {
     const diffHours = Math.floor(timeDiff / (1000 * 3600));
     // get remaining minutes
     const diffMinutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-    return `${diffHours}h ${diffMinutes}m  ${bt.lastStartSide}`;
+    return `${diffHours}h ${diffMinutes}m`;
 }
 
 process.on("SIGINT", function() {
