@@ -131,15 +131,16 @@ export class EdgeMax {
         this.connectWebsocket();
     }
 
-    private onWsMessage(data: string) {
+    private onWsMessage(data: Buffer) {
+        const stringData = data.toString();
         if (this.incomingLength === 0) {
-            // console.log('data :>> ', data.substring(0, 8));
-            const len = data.substring(0, data.indexOf('\n'));
+            console.log('stringData :>> ', stringData);
+            const len = stringData.substring(0, stringData.indexOf('\n'));
             this.incomingLength = parseInt(len, 10);
-            this.incomingData = data.substring(data.indexOf('\n') + 1);
+            this.incomingData = stringData.substring(stringData.indexOf('\n') + 1);
             // console.log('this.incomingLength :>> ', this.incomingLength);
         } else {
-            this.incomingData += data;
+            this.incomingData += stringData;
             // console.log('Added data: ', this.incomingData.length);
         }
 
