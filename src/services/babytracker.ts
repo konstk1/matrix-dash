@@ -16,6 +16,7 @@ type EventInfo = {
     opCode: number, // 0-create, 1-update, 2-delete
     type: string,
     startSide: string, // E-expressed, R-right, L-left
+    medication: string,
     time: Date,
     baby: string,
 }
@@ -37,6 +38,9 @@ export class BabyTracker {
     private newEvents: EventInfo[] = [];
     lastFeedingTime: Date = new Date(0);
     lastStartSide = '';
+
+    lastIbuprofenTime: Date = new Date(0);
+    lastAcetaminophenTime: Date = new Date(0);
 
     constructor() {
         if (!this.email || !this.password) {
@@ -128,8 +132,8 @@ export class BabyTracker {
         // save events to local storage
         this.newEvents.push(...events);
 
-        // look for feed events
-        this.findFeedings(events);
+        // look for medication events
+        this.findMedications(events);
     }
 
     calcSyncDiff(remoteDevice: DeviceInfo): number {
@@ -151,7 +155,9 @@ export class BabyTracker {
         return transactions.map(t => {
             // base64 decode the data
             const obj = JSON.parse(Buffer.from(t.Transaction, 'base64').toString('utf8'));
-            // console.log('obj :>> ', obj);
+            if (obj.BCObjectType === 'Medication') {
+                // console.log('obj :>> ', obj);
+            }
 
             let startSide = 'E';    // assume Expressed unless Nursing below
             if (obj.BCObjectType === 'Nursing') {
@@ -159,11 +165,19 @@ export class BabyTracker {
                 startSide = obj.finishSide === 2 ? 'R' : 'L';
             }
 
+            let medication = obj.medicationSelection?.name || '';
+            if (medication.toLowerCase().includes('ibuprofen') || medication.toLowerCase().includes('motrin')) {
+                medication = 'ibuprofen';
+            } else if (medication.toLowerCase().includes('acetaminophen') || medication.toLowerCase().includes('tylenol')) {
+                medication = 'acetaminophen';
+            }
+
             return {
                 syncID: t.SyncID,
                 opCode: t.OPCode,
                 type: obj.BCObjectType,
                 startSide: startSide,
+                medication: medication,
                 time: new Date(obj.time),
                 baby: obj.baby?.name || '',
             };
@@ -191,5 +205,27 @@ export class BabyTracker {
             }
         }
         // console.log(feedings);
+    }
+
+    findMedications(events: EventInfo[]) {
+        const medications: EventInfo[] = [];
+        for (const event of events) {
+            if (event.type === 'Medication') {
+                medications.push(event);
+
+                // update last ibuprofen time
+                if (event.medication === 'ibuprofen' && event.time > this.lastIbuprofenTime) {
+                    log.info(`Found more recent ibuprofen (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+                    this.lastIbuprofenTime = event.time;
+                }
+
+                // update last acetaminophen time
+                if (event.medication === 'acetaminophen' && event.time > this.lastAcetaminophenTime) {
+                    log.info(`Found more recent acetaminophen (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+                    this.lastAcetaminophenTime = event.time;
+                }
+            }
+        }
+        console.log(medications);
     }
 };

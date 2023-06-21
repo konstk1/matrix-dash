@@ -33,7 +33,7 @@ function babyBrotherAge() {
 const bt = new BabyTracker();
 
 // @ts-ignore
-async function getLastFeed() {
+async function getLastMeds() {
     try {
         await bt.sync();
     } catch (error) {
@@ -46,13 +46,20 @@ async function getLastFeed() {
     }
 
     const now = new Date();
-    const timeDiff = now.getTime() - bt.lastFeedingTime.getTime();
+    const timeDiffIbuprofen = now.getTime() - bt.lastIbuprofenTime.getTime();
+    const timeDiffAcetaminophen = now.getTime() - bt.lastAcetaminophenTime.getTime();
 
     // split into hours
-    const diffHours = Math.floor(timeDiff / (1000 * 3600));
+    const diffHoursIbuprofen = timeDiffIbuprofen / (1000 * 3600);
     // get remaining minutes
-    const diffMinutes = Math.floor((timeDiff % (1000 * 3600)) / (1000 * 60));
-    return `${diffHours}h ${diffMinutes}m`;
+    // const diffMinutesIbuprofen = Math.floor((timeDiffIbuprofen % (1000 * 3600)) / (1000 * 60));
+
+    // split into hours
+    const diffHoursAcetaminophen = timeDiffAcetaminophen / (1000 * 3600);
+    // get remaining minutes
+    // const diffMinutesAcetaminophen = Math.floor((timeDiffAcetaminophen % (1000 * 3600)) / (1000 * 60));
+
+    return `I ${diffHoursIbuprofen.toFixed(1)}  T ${diffHoursAcetaminophen.toFixed(1)}`;
 }
 
 process.on("SIGINT", function() {
@@ -86,7 +93,7 @@ async function main() {
         
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
         // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        scroller.setText(` ${await getLastFeed()}`);
+        scroller.setText(`${await getLastMeds()}`);
         // scroller.scrollSpeed = 1;
         // scroller.fgColor = 0x5555FF;
         scroller.fgColor = 0xeb9b34; // orange
@@ -94,7 +101,7 @@ async function main() {
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(async () => {
-            scroller.setText(` ${await getLastFeed()}`);
+            scroller.setText(`${await getLastMeds()}`);
         }, 1000 * 60 * 5);
         
 
