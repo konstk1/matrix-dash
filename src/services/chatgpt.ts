@@ -18,6 +18,6 @@ export class ChatGPT {
       prompt,
     });
 
-    return response.data.choices[0].text;
+    return response.data.choices[0].text?.trim();
   }
 }

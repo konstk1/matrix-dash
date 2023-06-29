@@ -18,6 +18,7 @@ import { BabyTracker } from './src/services/babytracker';
 import { TimerWidget } from './src/widgets/timer-widget';
 // @ts-ignore
 import { CanvasWidget } from './src/widgets/canvas-widget';
+import { ChatGPT } from './src/services/chatgpt';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -31,6 +32,7 @@ function babyBrotherAge() {
 }
 
 const bt = new BabyTracker();
+const chatgpt = new ChatGPT();
 
 // @ts-ignore
 async function getLastMeds() {
@@ -60,6 +62,11 @@ async function getLastMeds() {
     // const diffMinutesAcetaminophen = Math.floor((timeDiffAcetaminophen % (1000 * 3600)) / (1000 * 60));
 
     return `I ${diffHoursIbuprofen.toFixed(1)}  T ${diffHoursAcetaminophen.toFixed(1)}`;
+}
+
+async function getScrollerMessage() {
+    const answer = await chatgpt.generate('Say a nice short sentence about someone named Steph');
+    return answer || "ChatGPT Error";
 }
 
 process.on("SIGINT", function() {
@@ -93,15 +100,15 @@ async function main() {
         
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
         // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        scroller.setText(`${await getLastMeds()}`);
-        // scroller.scrollSpeed = 1;
+        scroller.setText(await getScrollerMessage());
+        scroller.scrollSpeed = 1;
         // scroller.fgColor = 0x5555FF;
         scroller.fgColor = 0xeb9b34; // orange
         // scroller.fgColor = 0x00FF00; // green
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(async () => {
-            scroller.setText(`${await getLastMeds()}`);
+            scroller.setText(await getScrollerMessage());
         }, 1000 * 60 * 5);
         
 
