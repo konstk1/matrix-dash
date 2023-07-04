@@ -16,8 +16,15 @@ export class ChatGPT {
     const response = await this.openai.createCompletion({
       model: "text-davinci-003",
       prompt,
+      // temperature: 1.3,
+      // top_p: .1,
+      n: 1,
     });
 
+    console.log('ChatGPT usage: ', response.data.usage)
+
+    console.log(response.data.choices.map((c) => c.text?.trim()).join('\n'))
+    
     return response.data.choices[0].text?.trim();
   }
 }

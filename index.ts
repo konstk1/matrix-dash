@@ -109,7 +109,7 @@ async function main() {
 
         setInterval(async () => {
             scroller.setText(await getScrollerMessage());
-        }, 1000 * 60 * 5);
+        }, 1000 * 60 * 60);
         
 
     //    const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
