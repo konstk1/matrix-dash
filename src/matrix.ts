@@ -7,7 +7,7 @@ if (process.env.NODE_ENV !== 'test') {
         ...LedMatrix.defaultMatrixOptions(),
         rows: 32,
         cols: 64,
-        hardwareMapping: GpioMapping.AdafruitHat,
+        hardwareMapping: GpioMapping.AdafruitHatPwm,
         showRefreshRate: false,
     }, {
         ...LedMatrix.defaultRuntimeOptions(),
