@@ -27,4 +27,23 @@ export class ChatGPT {
     
     return response.data.choices[0].text?.trim();
   }
+
+  public async generateChat(prompt: string): Promise<string | undefined> {
+    const response = await this.openai.createChatCompletion({
+      model: "gpt-3.5-turbo",
+      messages: [{
+        role: 'system',
+        content: 'You are a sarcastic coworker who responds with short sentence.',
+      }, {
+        role: 'user',
+        content: prompt,
+      }],
+    })
+
+    console.log('ChatGPT usage: ', response.data.usage)
+
+    console.log(response.data.choices);
+
+    return response.data.choices[0].message?.content.trim();
+  }
 }
