@@ -19,6 +19,13 @@ import { TimerWidget } from './src/widgets/timer-widget';
 // @ts-ignore
 import { CanvasWidget } from './src/widgets/canvas-widget';
 import { ChatGPT } from './src/services/chatgpt';
+const BH1750 = require('bh1750-sensor');
+
+const options = {
+    readMode: BH1750.ONETIME_H_RESOLUTION_MODE
+};
+
+const bh1750 = new BH1750(options);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -110,6 +117,12 @@ async function main() {
         setInterval(async () => {
             scroller.setText(await getScrollerMessage());
         }, 1000 * 60 * 60);
+
+        
+        setInterval(async () => {
+            let data = bh1750.readData();
+            console.log('Light level:', data);
+        }, 1000 * 1);
         
 
     //    const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
