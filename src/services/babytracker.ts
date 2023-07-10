@@ -166,7 +166,7 @@ export class BabyTracker {
             }
 
             let medication = obj.medicationSelection?.name || '';
-            if (medication.toLowerCase().includes('ibuprofen') || medication.toLowerCase().includes('motrin')) {
+            if (medication.toLowerCase().includes('ibuprofen') || medication.toLowerCase().includes('motrin') || medication.toLowerCase().includes('advil')) {
                 medication = 'ibuprofen';
             } else if (medication.toLowerCase().includes('acetaminophen') || medication.toLowerCase().includes('tylenol')) {
                 medication = 'acetaminophen';

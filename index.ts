@@ -71,8 +71,9 @@ async function getLastMeds() {
     return `I ${diffHoursIbuprofen.toFixed(1)}  T ${diffHoursAcetaminophen.toFixed(1)}`;
 }
 
+// @ts-ignore
 async function getScrollerMessage() {
-    const answer = await chatgpt.generate('Say a nice short sentence about someone named Steph');
+    const answer = await chatgpt.generateChat('Write a very short snarky compliment for Steph');
     return answer || "ChatGPT Error";
 }
 
@@ -107,16 +108,16 @@ async function main() {
         
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
         // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        scroller.setText(await getScrollerMessage());
-        scroller.scrollSpeed = 1;
+        scroller.setText(await getLastMeds());
+        scroller.scrollSpeed = 0;
         // scroller.fgColor = 0x5555FF;
         scroller.fgColor = 0xeb9b34; // orange
         // scroller.fgColor = 0x00FF00; // green
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(async () => {
-            scroller.setText(await getScrollerMessage());
-        }, 1000 * 60 * 60);
+            scroller.setText(await getLastMeds());
+        }, 1000 * 60 * 5);
 
         
         setInterval(async () => {
