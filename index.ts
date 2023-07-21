@@ -72,9 +72,24 @@ async function getLastMeds() {
 }
 
 // @ts-ignore
-async function getScrollerMessage() {
+async function chatGptMessage() {
     const answer = await chatgpt.generateChat('Write a very short snarky compliment for Steph');
     return answer || "ChatGPT Error";
+}
+
+// @ts-ignore
+async function lightLevelMessage() {
+    let data = bh1750.readData();
+    return ` Light: ${data.toFixed(1)}`;
+}
+
+// bottom scroller settings
+const SCROLLER_SCROLL_SPEED = 0;
+const SCROLLER_UPDATE_INTERVAL_SEC = 1;
+
+// @ts-ignore
+async function getScrollerMessage() {
+    return lightLevelMessage();
 }
 
 process.on("SIGINT", function() {
@@ -107,22 +122,19 @@ async function main() {
         
         
         const scroller = new TextWidget({ width: 64, height: 16 }, 0);
-        // scroller.setText(`Kai is ${babyBrotherAge()} days old!`);
-        scroller.setText(await getLastMeds());
-        scroller.scrollSpeed = 0;
-        // scroller.fgColor = 0x5555FF;
+        scroller.setText(await getScrollerMessage());
+        scroller.scrollSpeed = SCROLLER_SCROLL_SPEED;
         scroller.fgColor = 0xeb9b34; // orange
-        // scroller.fgColor = 0x00FF00; // green
         page1.addWidget(scroller, { x: 0, y: 16 });
 
         setInterval(async () => {
-            scroller.setText(await getLastMeds());
-        }, 1000 * 60 * 5);
+            scroller.setText(await getScrollerMessage());
+        }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC);
 
         
         setInterval(async () => {
             let data = bh1750.readData();
-            console.log('Light level:', data);
+            console.log('Light level:', data.toFixed(2));
         }, 1000 * 1);
         
 
