@@ -13,6 +13,7 @@ type DeviceInfo = {
 
 type EventInfo = {
     syncID: number,
+    objectID: UUID,
     opCode: number, // 0-create, 1-update, 2-delete
     type: string,
     startSide: string, // E-expressed, R-right, L-left
@@ -110,7 +111,7 @@ export class BabyTracker {
 
         let eventTypes = [...new Set(this.newEvents.map(e => e.type))];
         log.verbose(`Sync complete, found ${eventTypes.length} event types: [${eventTypes}]`);
-        log.info(`Most recent feeding at ${this.lastFeedingTime.toLocaleString()}`);
+        // log.info(`Most recent feeding at ${this.lastFeedingTime.toLocaleString()}`);
     }
 
     async syncDevice(remoteDevice: DeviceInfo, numToSync: number) {
@@ -126,6 +127,8 @@ export class BabyTracker {
         const events = this.parseTransactions(res.data).filter(e => e.baby === 'Kai');
         // console.log(events);
 
+        // TODO: collapse events by objectID, only keep the most recent
+        
         // update local sync state
         this.localDeviceInfo[remoteDevice.DeviceUUID] = remoteDevice;
 
@@ -156,7 +159,7 @@ export class BabyTracker {
             // base64 decode the data
             const obj = JSON.parse(Buffer.from(t.Transaction, 'base64').toString('utf8'));
             if (obj.BCObjectType === 'Medication') {
-                // console.log('obj :>> ', obj);
+                console.log('obj :>> ', obj);
             }
 
             let startSide = 'E';    // assume Expressed unless Nursing below
@@ -174,6 +177,7 @@ export class BabyTracker {
 
             return {
                 syncID: t.SyncID,
+                objectID: t.ObjectID,
                 opCode: t.OPCode,
                 type: obj.BCObjectType,
                 startSide: startSide,
