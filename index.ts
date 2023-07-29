@@ -133,8 +133,15 @@ async function main() {
 
         
         setInterval(async () => {
-            let data = bh1750.readData();
-            console.log('Light level:', data.toFixed(2));
+            let level = bh1750.readData();
+            if (level < 5) {
+                matrix && matrix.brightness(20);
+            } else if (level < 10) {
+                matrix && matrix.brightness(35);
+            } else {
+                matrix && matrix.brightness(50);
+            }
+            console.log('Light level:', level.toFixed(2));
         }, 1000 * 1);
         
 
