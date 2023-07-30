@@ -80,7 +80,7 @@ async function chatGptMessage() {
 // @ts-ignore
 async function lightLevelMessage() {
     let data = bh1750.readData();
-    return ` Light: ${data.toFixed(1)}`;
+    return ` L: ${data.toFixed(0)} B: ${matrix.brightness()}`;
 }
 
 // bottom scroller settings
@@ -90,6 +90,31 @@ const SCROLLER_UPDATE_INTERVAL_SEC = 1;
 // @ts-ignore
 async function getScrollerMessage() {
     return lightLevelMessage();
+}
+
+function autoDimmer(page: Page) {
+    if (!matrix) {
+        return;
+    }
+
+    const currentBrightness = matrix.brightness();
+    let newBrightness = currentBrightness;
+
+    let level = bh1750.readData();
+    if (level < 5) {
+        newBrightness = 20;
+    } else if (level < 10) {
+        newBrightness = 35;
+    } else {
+        newBrightness = 50;
+    }
+
+    if (newBrightness !== currentBrightness) {
+        matrix.brightness(newBrightness);
+        page.draw();
+    }
+
+    console.log('Light level:', level.toFixed(2));
 }
 
 process.on("SIGINT", function() {
@@ -131,20 +156,6 @@ async function main() {
             scroller.setText(await getScrollerMessage());
         }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC);
 
-        
-        setInterval(async () => {
-            let level = bh1750.readData();
-            if (level < 5) {
-                matrix && matrix.brightness(20);
-            } else if (level < 10) {
-                matrix && matrix.brightness(35);
-            } else {
-                matrix && matrix.brightness(50);
-            }
-            console.log('Light level:', level.toFixed(2));
-        }, 1000 * 1);
-        
-
     //    const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
     //    page1.addWidget(canvas, { x: 0, y: 14 });
 
@@ -153,6 +164,8 @@ async function main() {
         // timer.start(60*36);
 
         page1.activate();
+
+        setInterval(autoDimmer, 1000 * 1, page1);
 
         while (true) {
             await sleep(1000);
