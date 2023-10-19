@@ -29,15 +29,6 @@ const bh1750 = new BH1750(options);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// @ts-ignore
-function babyBrotherAge() {
-    const today = new Date();
-    const birthDate = new Date('2022-04-26');
-    const timeDiff = today.getTime() - birthDate.getTime();
-    const diffDays = Math.floor(timeDiff / (1000 * 3600 * 24));
-    return diffDays;
-}
-
 const bt = new BabyTracker();
 const chatgpt = new ChatGPT();
 
@@ -60,15 +51,18 @@ async function getLastMeds() {
 
     // split into hours
     const diffHoursIbuprofen = timeDiffIbuprofen / (1000 * 3600);
-    // get remaining minutes
-    // const diffMinutesIbuprofen = Math.floor((timeDiffIbuprofen % (1000 * 3600)) / (1000 * 60));
-
-    // split into hours
     const diffHoursAcetaminophen = timeDiffAcetaminophen / (1000 * 3600);
-    // get remaining minutes
-    // const diffMinutesAcetaminophen = Math.floor((timeDiffAcetaminophen % (1000 * 3600)) / (1000 * 60));
 
-    return `I ${diffHoursIbuprofen.toFixed(1)}  T ${diffHoursAcetaminophen.toFixed(1)}`;
+    // convert to days if larger than 48 hours
+    const ibuprofenStr = diffHoursIbuprofen <= 48 ? 
+        `${diffHoursIbuprofen.toFixed(1)}` : 
+        (diffHoursIbuprofen > 720) ? '∞' : `${(diffHoursIbuprofen/24).toFixed(1)}d`;
+
+    const acetaminophenStr = diffHoursAcetaminophen <= 48 ? 
+        `${diffHoursAcetaminophen.toFixed(1)}` : 
+        (diffHoursAcetaminophen > 720) ? '∞' : `${(diffHoursAcetaminophen/24).toFixed(1)}d`;
+
+    return `I ${ibuprofenStr}  T ${acetaminophenStr}`;
 }
 
 // @ts-ignore
@@ -85,11 +79,11 @@ async function lightLevelMessage() {
 
 // bottom scroller settings
 const SCROLLER_SCROLL_SPEED = 0;
-const SCROLLER_UPDATE_INTERVAL_SEC = 1;
+const SCROLLER_UPDATE_INTERVAL_SEC = 100;
 
 // @ts-ignore
 async function getScrollerMessage() {
-    return lightLevelMessage();
+    return getLastMeds();
 }
 
 function autoDimmer(page: Page) {
