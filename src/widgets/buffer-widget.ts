@@ -37,15 +37,15 @@ export class BufferWidget extends Widget {
 
         const pulsers: Pulser[] = [];
 
-        for (let x = 0; x < this.matrix.width(); x++) {
-            for (let y = 0; y < this.matrix.height(); y++) {
+        for (let x = 0; x < this.size.width; x++) {
+            for (let y = 0; y < this.size.height; y++) {
                 pulsers.push(new Pulser(x, y, 5 * Math.random()));
             }
         }
 
         this.matrix.afterSync((mat, dt, t) => {
             pulsers.map(pulser => {
-                this.matrix.fgColor(pulser.nextColor(t)).setPixel(pulser.x, pulser.y);
+                this.matrix.fgColor(pulser.nextColor(t)).setPixel(this.origin.x+pulser.x, this.origin.y+pulser.y);
             });
             setTimeout(() => this.matrix.sync(), 0);
         });

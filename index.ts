@@ -78,12 +78,14 @@ async function lightLevelMessage() {
 }
 
 // bottom scroller settings
+// @ts-ignore
 const SCROLLER_SCROLL_SPEED = 0;
-const SCROLLER_UPDATE_INTERVAL_SEC = 100;
+// @ts-ignore
+const SCROLLER_UPDATE_INTERVAL_SEC = 1;
 
 // @ts-ignore
 async function getScrollerMessage() {
-    return getLastMeds();
+    return lightLevelMessage();
 }
 
 function autoDimmer(page: Page) {
@@ -137,21 +139,19 @@ async function main() {
 
         // const buffer = new BufferWidget({ width: 64, height: 16 }, 0);
         // page1.addWidget(buffer, { x: 0, y: 16 });
-
         
-        
-        const scroller = new TextWidget({ width: 64, height: 16 }, 0);
-        scroller.setText(await getScrollerMessage());
-        scroller.scrollSpeed = SCROLLER_SCROLL_SPEED;
-        scroller.fgColor = 0xeb9b34; // orange
-        page1.addWidget(scroller, { x: 0, y: 16 });
+        // const scroller = new TextWidget({ width: 64, height: 16 }, 0);
+        // scroller.setText(await getScrollerMessage());
+        // scroller.scrollSpeed = SCROLLER_SCROLL_SPEED;
+        // scroller.fgColor = 0xeb9b34; // orange
+        // page1.addWidget(scroller, { x: 0, y: 16 });
 
-        setInterval(async () => {
-            scroller.setText(await getScrollerMessage());
-        }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC);
+        // setInterval(async () => {
+        //     scroller.setText(await getScrollerMessage());
+        // }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC);
 
-    //    const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
-    //    page1.addWidget(canvas, { x: 0, y: 14 });
+       const canvas = new CanvasWidget({ width: 64, height: 18 }, 0);
+       page1.addWidget(canvas, { x: 0, y: 14 });
 
         // const timer = new TimerWidget({ width: 64, height: 16 }, 0);
         // page1.addWidget(timer, { x: 0, y: 16 });
