@@ -124,7 +124,7 @@ export class BabyTracker {
             return;
         }
 
-        const events = this.parseTransactions(res.data).filter(e => e.baby === 'Kai');
+        const events = this.parseTransactions(res.data) //.filter(e => e.baby === 'Kai');
         // console.log(events);
 
         // TODO: collapse events by objectID, only keep the most recent
