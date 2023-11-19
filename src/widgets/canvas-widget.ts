@@ -7,6 +7,7 @@ type Pixel = {
     x: number, 
     y: number, 
     color: Rgb,
+    initialColor: Rgb,
     startTime: Date,
     durationMs: number,
 };
@@ -18,7 +19,6 @@ export class CanvasWidget extends Widget {
 
     protected override updateIntervalMs: number = 60;
 
-    // @ts-ignore
     private startTime: Date = new Date();
 
     constructor(size: Size, border: number = 0) {
@@ -50,15 +50,35 @@ export class CanvasWidget extends Widget {
         // log.debug(`  ${this.constructor.name} Drawing done`);
     }
 
+    private randomPixel(): Pixel {
+        // limit random colors to only those with at least one 255 (eg: red, green, blue, purple)
+        const colorIdx = Math.floor(Math.random() * 3);
+
+        const color = {
+            r: colorIdx === 0 ? 255 : Math.random() * 255,
+            g: colorIdx === 1 ? 255 : Math.random() * 255,
+            b: colorIdx === 2 ? 255 : Math.random() * 255,
+        };
+
+        return {
+            x: Math.floor(Math.random() * this.size.width),
+            y: Math.floor(Math.random() * this.size.height),
+            color: color,
+            initialColor: color,
+            startTime: new Date(),
+            durationMs: 1000 + Math.floor(Math.random() * 2000),
+        };
+    }
+
     private updatePixel(pixel: Pixel): Pixel | undefined {
         const now = new Date();
         const elapsedMs = now.getTime() - pixel.startTime.getTime();
 
         if (elapsedMs < pixel.durationMs) {
             pixel.color = {
-                r: 255 * (1 - elapsedMs / pixel.durationMs),
-                g: 255 * (1 - elapsedMs / pixel.durationMs),
-                b: 255 * (1 - elapsedMs / pixel.durationMs),
+                r: pixel.initialColor.r * (1 - elapsedMs / pixel.durationMs),
+                g: pixel.initialColor.g * (1 - elapsedMs / pixel.durationMs),
+                b: pixel.initialColor.b * (1 - elapsedMs / pixel.durationMs),
             };
             return pixel;
         } else {
@@ -71,15 +91,10 @@ export class CanvasWidget extends Widget {
         const tMs = new Date().getTime() - this.startTime.getTime();
 
         // log.debug(`CanvasWidget.update() tMs ${tMs} ms`);
-        if (Math.random() < .99 && this.pixels.length < 50) {
-            // insert new pixel
-            const x = Math.floor(Math.random() * this.size.width);
-            const y = Math.floor(Math.random() * this.size.height);
-            const color: Rgb = { r: 255, g: 255, b: 255 };
-            const durationMs = 1000 + Math.floor(Math.random() * 2000);
-            const startTime = new Date();
+        if (Math.random() < .99 && this.pixels.length < 70) {
+           const pixel = this.randomPixel();
             // log.info(`Inserting new pixel (dur ${durationMs}), length: ${this.pixels.length}`);
-            this.pixels.push({ x, y, color, startTime, durationMs });
+            this.pixels.push(pixel);
         }
         // const phase = -tMs * Math.PI / 1000;
 
