@@ -110,7 +110,7 @@ function autoDimmer(page: Page) {
         page.draw();
     }
 
-    console.log('Light level:', level.toFixed(2));
+    // console.log('Light level:', level.toFixed(2));
 }
 
 process.on("SIGINT", function() {

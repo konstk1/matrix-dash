@@ -70,15 +70,15 @@ export class CanvasWidget extends Widget {
         // @ts-ignore
         const tMs = new Date().getTime() - this.startTime.getTime();
 
-        log.debug(`CanvasWidget.update() tMs ${tMs} ms`);
-        if (Math.random() < .99) {
+        // log.debug(`CanvasWidget.update() tMs ${tMs} ms`);
+        if (Math.random() < .99 && this.pixels.length < 50) {
             // insert new pixel
             const x = Math.floor(Math.random() * this.size.width);
             const y = Math.floor(Math.random() * this.size.height);
             const color: Rgb = { r: 255, g: 255, b: 255 };
             const durationMs = 1000 + Math.floor(Math.random() * 2000);
             const startTime = new Date();
-            log.debug(`Inserting new pixel (dur ${durationMs}), length: ${this.pixels.length}`);
+            // log.info(`Inserting new pixel (dur ${durationMs}), length: ${this.pixels.length}`);
             this.pixels.push({ x, y, color, startTime, durationMs });
         }
         // const phase = -tMs * Math.PI / 1000;
