@@ -1,3 +1,4 @@
+import { isPointWithinRadius, getDistance } from 'geolib'
 import { log } from '../log'
 
 type Position = {
@@ -81,7 +82,6 @@ export class AircraftTracker {
     if (fields[1] === '1') {
       const callsign = fields[10]
       // update callsign if ident exists, otherwise create ident with callsign
-      console.log('callsign', callsign)
       if (info.ident) {
         info.ident.callsign = callsign
       } else {
@@ -90,10 +90,9 @@ export class AircraftTracker {
     }
     // MSG,3 is Position
     if (fields[1] === '3') {
-      console.log('fields[11] :>> ', fields[10]);
       const alt = Number(fields[11])
-      const lon = Number(fields[14])
-      const lat = Number(fields[15])
+      const lat = Number(fields[14])
+      const lon = Number(fields[15])
       // update position if position exists, otherwise create position with position
       if (info.pos) {
         info.pos.alt = alt
@@ -104,7 +103,7 @@ export class AircraftTracker {
       }
     }
 
-    log.verbose(`Aircraft ${icao} updated: ${JSON.stringify(info)}`)
+    log.verbose(`Aircraft ${icao} updated: ${info.ident?.callsign} (${info.pos?.lat}, ${info.pos?.lon})`)
 
     this.aircraft[icao] = info
   }
@@ -113,16 +112,22 @@ export class AircraftTracker {
     return this.aircraft[icao]
   }
 
-  getOverheadAircraft(): AircraftInfo[] {
+  getOverheadAircraft(radiusM: number): AircraftInfo[] {
     const overhead: AircraftInfo[] = []
+
     for (const icao in this.aircraft) {
       const aircraft = this.aircraft[icao]
-      // TODO: calculate distance from home
 
-      if (0) {
+      if (!aircraft.pos || !aircraft.ident) {
+        continue
+      }
+
+      console.log(`${aircraft.ident.callsign} is ${getDistance(aircraft.pos, this.homePos)}m from home`)
+      if (isPointWithinRadius(aircraft.pos, this.homePos, radiusM)) {
         overhead.push(aircraft)
       }
     }
+
     return overhead
   }
 
