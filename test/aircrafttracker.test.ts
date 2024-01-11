@@ -29,46 +29,49 @@ MSG, 3, 1, 1, A3ED7C, 1, 2024 /01 /09,00: 26: 38.455, 2024 /01 /09,00: 26: 38.50
 `
 
 describe('AircraftTracker', () => {
-  const aircraftTracker = new AircraftTracker()
+  const tracker = new AircraftTracker()
 
   beforeAll(() => {
-    aircraftTracker.start()
+    tracker.start()
   })
 
   afterAll(() => {
-    aircraftTracker.stop()
+    tracker.stop()
   })
 
   it('Processes SBS messages', () => {
     const messages = data.split('\n')
     messages.forEach(message => {
-      aircraftTracker.processSbsMessage(message)
+      tracker.processSbsMessage(message)
     })
 
     const expected: AircraftInfo[] = [{
       timestamp: expect.any(Date),
       icao: 'A3ED7C',
       ident: { callsign: 'DAL2352' },
-      pos: { lon: 42.392051, lat: -71.046796, alt: 2025, }
+      pos: { lat: 42.392051, lon: -71.046796, alt: 2025, }
     }, {
       timestamp: expect.any(Date),
       icao: 'A28A2C',
-      pos: { lon: 42.633133, lat: -71.131231, alt: 8850, },
+      pos: { lat: 42.633133, lon: -71.131231, alt: 8850, },
       ident: { callsign: 'ASA357' }
     }, {
       timestamp: expect.any(Date),
       icao: 'A20433',
-      pos: { lon: 42.238495, lat: -71.608575, alt: 37000, },
+      pos: { lat: 42.238495, lon: -71.608575, alt: 37000, },
       ident: undefined
     }]
 
     for (const a of expected) {
-      const aircraft = aircraftTracker.getAircraft(a.icao)
+      const aircraft = tracker.getAircraft(a.icao)
       expect(aircraft).toEqual(a)
       // verify timestamp is within 10ms of now
       expect(aircraft!.timestamp.getTime()).toBeCloseTo(new Date().getTime(), -1)
     }
 
-    expect(aircraftTracker.getAircraft('A12345')).toBeUndefined()
+    expect(tracker.getAircraft('A12345')).toBeUndefined()
+
+    expect(tracker.getOverheadAircraft(5000)).toHaveLength(0)
+    expect(tracker.getOverheadAircraft(9000)).toHaveLength(1)
   })
 })
