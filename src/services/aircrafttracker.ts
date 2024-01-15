@@ -1,5 +1,6 @@
-import { isPointWithinRadius, getDistance } from 'geolib'
-import { log } from '../log'
+import * as net from 'net'
+import { isPointWithinRadius, getDistance, getGreatCircleBearing } from 'geolib'
+// import { log } from '../log'
 
 type Position = {
   lat: number
@@ -24,12 +25,13 @@ export type AircraftInfo = {
 }
 
 export class AircraftTracker {
-  // private readonly adsbHost = process.env.ADSB_HOST
-  // private readonly adsbPort = process.env.ADSB_PORT
+  private readonly adsbHost = process.env.ADSB_HOST || 'localhost'
+  private readonly adsbPort = Number(process.env.ADSB_PORT) || 30003
+
+  private socket = new net.Socket()
 
   private readonly aircraft: Record<string, AircraftInfo> = {}
 
-  // @ts-ignore
   private readonly homePos: Position = {
     lat: Number(process.env.HOME_LAT),
     lon: Number(process.env.HOME_LON),
@@ -38,22 +40,34 @@ export class AircraftTracker {
 
   private readonly staleTimeoutMs = 10000
 
-  // @ts-ignore
   private timer?: NodeJS.Timer
 
   constructor() {
-
+    this.socket.on('data', this.onSocketData.bind(this))
+    this.socket.on('error', (err) => {
+      console.error('ADSB socket error: ', err)
+    })
   }
 
   start() {
     // open tcp socket to ADSB host
+    this.socket.connect(this.adsbPort, this.adsbHost, () => {
+      console.log('Connected to ADSB host')
+    })
+
     this.timer = setInterval(this.cleanStaleAircraft.bind(this), 1000)
   }
 
   stop() {
-    if (this.timer) {
-      clearInterval(this.timer)
-    }
+    this.socket.destroy()
+    clearInterval(this.timer)
+  }
+
+  private onSocketData(data: Buffer) {
+    const messages = data.toString().split('\n')
+    messages.forEach(message => {
+      this.processSbsMessage(message)
+    })
   }
 
   // http://woodair.net/sbs/article/barebones42_socket_data.htm
@@ -77,6 +91,9 @@ export class AircraftTracker {
       timestamp: new Date(),
       icao,
     }
+
+    // update timestamp on any message
+    info.timestamp = new Date()
 
     // MSG,1 is IDENT
     if (fields[1] === '1') {
@@ -103,7 +120,7 @@ export class AircraftTracker {
       }
     }
 
-    log.verbose(`Aircraft ${icao} updated: ${info.ident?.callsign} (${info.pos?.lat}, ${info.pos?.lon})`)
+    // log.verbose(`Aircraft (${Object.keys(this.aircraft).length}) ${icao} updated: ${info.ident?.callsign} (${info.pos?.lat}, ${info.pos?.lon})`)
 
     this.aircraft[icao] = info
   }
@@ -116,15 +133,20 @@ export class AircraftTracker {
     const overhead: AircraftInfo[] = []
 
     for (const icao in this.aircraft) {
-      const aircraft = this.aircraft[icao]
+      const plane = this.aircraft[icao]
 
-      if (!aircraft.pos || !aircraft.ident) {
+      if (!plane.pos || !plane.ident) {
         continue
       }
 
-      console.log(`${aircraft.ident.callsign} is ${getDistance(aircraft.pos, this.homePos)}m from home`)
-      if (isPointWithinRadius(aircraft.pos, this.homePos, radiusM)) {
-        overhead.push(aircraft)
+      plane.relative = {
+        distanceFromHome: getDistance(this.homePos, plane.pos),
+        bearingFromHome: getGreatCircleBearing(this.homePos, plane.pos)
+      }
+
+      console.log(`${plane.ident.callsign} is ${plane.relative?.distanceFromHome}m from home (bearing ${plane.relative?.bearingFromHome})`)
+      if (isPointWithinRadius(plane.pos, this.homePos, radiusM)) {
+        overhead.push(plane)
       }
     }
 
@@ -132,16 +154,14 @@ export class AircraftTracker {
   }
 
   private cleanStaleAircraft() {
-    console.log('cleaing stale: ', this)
-
     const now = new Date()
     for (const icao in this.aircraft) {
       const aircraft = this.aircraft[icao]
       const diff = now.getTime() - aircraft.timestamp.getTime()
       // delete aircraft if haven't seen in some time
       if (diff > this.staleTimeoutMs) {
-        console.log('Deleting stale aircraft: ', aircraft.icao)
         delete this.aircraft[icao]
+        console.log(`--> Deleted stale aircraft (${Object.keys(aircraft).length}): ${aircraft.icao}`)
       }
     }
   }

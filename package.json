@@ -2,7 +2,7 @@
   "name": "matrix-dash",
   "version": "1.0.0",
   "description": "Dashboard for matrix LED",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "author": "Konstantin Klitenik",
   "license": "MIT",
   "repository": {
@@ -10,9 +10,9 @@
     "url": "git+https://github.com/konstk1/matrix-dash.git"
   },
   "scripts": {
-    "start": "ts-node index.ts",
+    "start": "ts-node src/index.ts",
     "build": "tsc",
-    "watch": "sudo nodemon -w dist --delay 1 --exec \"node dist/index.js\"",
+    "watch": "sudo nodemon -w dist --delay 1 --exec \"node dist/src/index.js\"",
     "sync": "npm run build && ./sync.sh",
     "sim": "NODE_ENV=test npm start",
     "test": "jest"

@@ -59,7 +59,7 @@ export class WeatherWidget extends TextWidget {
             const current = await this.weather.getWeather();
             this.tempF = Math.round(current.tempF);
             this.lastUpdated = new Date();
-            log.verbose(`Fetched weather... ${this.tempF}F at ${current.timestamp.toLocaleString()}`);
+            // log.verbose(`Fetched weather... ${this.tempF}F at ${current.timestamp.toLocaleString()}`);
         } catch (error) {
             log.error('Error getting weather:', error);
         }
