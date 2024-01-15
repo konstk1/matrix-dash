@@ -28,6 +28,10 @@ MSG, 7, 1, 1, A28A2C, 1, 2024 /01 /09,00: 26: 38.392, 2024 /01 /09,00: 26: 38.45
 MSG, 3, 1, 1, A3ED7C, 1, 2024 /01 /09,00: 26: 38.455, 2024 /01 /09,00: 26: 38.505,, 2025,,, 42.392051, -71.046796,,, 0,, 0, 0
 `
 
+async function sleepMs(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 describe('AircraftTracker', () => {
   const tracker = new AircraftTracker()
 
@@ -74,4 +78,17 @@ describe('AircraftTracker', () => {
     expect(tracker.getOverheadAircraft(5000)).toHaveLength(0)
     expect(tracker.getOverheadAircraft(9000)).toHaveLength(1)
   })
+
+  it.skip('Opens and reads socket', async () => {
+    // wait 20 seconds
+    await sleepMs(20000)
+  }, 21000)
+
+  it.only('Gets overhead aircraft', async () => {
+    for (let i = 0; i < 20; i++) {
+      await sleepMs(3000)
+      console.log(tracker.getOverheadAircraft(9000))
+    }
+
+  }, 60000)
 })
