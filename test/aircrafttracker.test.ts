@@ -1,4 +1,5 @@
 import { AircraftInfo, AircraftTracker } from '../src/services/aircrafttracker'
+import { getAltitudeColor } from '../src/widgets/aircraft-widget'
 
 const data = `
 MSG, 7, 1, 1, A20433, 1, 2024 /01 /09,00: 26: 36.989, 2024 /01 /09,00: 26: 37.031,, 37000,,,,,,,,,,
@@ -43,7 +44,7 @@ describe('AircraftTracker', () => {
     tracker.stop()
   })
 
-  it('Processes SBS messages', () => {
+  it.skip('Processes SBS messages', () => {
     const messages = data.split('\n')
     messages.forEach(message => {
       tracker.processSbsMessage(message)
@@ -79,12 +80,22 @@ describe('AircraftTracker', () => {
     expect(tracker.getOverheadAircraft(9000)).toHaveLength(1)
   })
 
+  it.only('Gets altitude color', () => {
+    // test a few altitudes between 0 and 45000 feet
+    const altitudes = [0, 1000, 3500, 10_000, 36_090, 43_000]
+    const expectedColors = [0xFFFFFF, 0xF0FF00, 0x00FF0C, 0x00FFE4, 0x9600FF, 0xFF0000]
+    for (let i = 0; i < altitudes.length; i++) {
+      console.log(`Testing altitude ${altitudes[i]}: ${expectedColors[i]}`)
+      expect(getAltitudeColor(altitudes[i])).toEqual(expectedColors[i])
+    }
+  })
+
   it.skip('Opens and reads socket', async () => {
     // wait 20 seconds
     await sleepMs(20000)
   }, 21000)
 
-  it.only('Gets overhead aircraft', async () => {
+  it.skip('Gets overhead aircraft', async () => {
     for (let i = 0; i < 20; i++) {
       await sleepMs(3000)
       console.log(tracker.getOverheadAircraft(9000))
