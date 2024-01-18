@@ -1,5 +1,6 @@
 import { TextWidget } from './text-widget'
 import { AircraftTracker } from '../services/aircrafttracker'
+// @ts-ignore
 import { log } from '../log'
 
 const altitudeBreaks = [42650, 41010, 39370, 37730, 36090, 34450, 32810, 31170,
@@ -42,7 +43,7 @@ export class AircraftWidget extends TextWidget {
             return (prev.relative?.distanceFromHome ?? 0) < (curr.relative?.distanceFromHome ?? 0) ? prev : curr
         }, aircraft[0])
 
-        log.debug(`Closest aircraft: ${JSON.stringify(closestAircraft)}`)
+        // log.debug(`Closest aircraft: ${JSON.stringify(closestAircraft)}`)
 
         if (closestAircraft) {
             // convert from meters to miles

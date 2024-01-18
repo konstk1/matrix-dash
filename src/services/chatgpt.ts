@@ -44,6 +44,6 @@ export class ChatGPT {
 
     console.log(response.data.choices);
 
-    return response.data.choices[0].message?.content.trim();
+    return response.data.choices[0].message?.content?.trim();
   }
 }
