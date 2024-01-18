@@ -1,4 +1,11 @@
-import * as winston from 'winston';
+import * as winston from 'winston'
+import * as fs from 'fs'
+
+// Create logs directory if it does not exist
+const logDir = 'logs'
+if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir)
+}
 
 export const log: winston.Logger = winston.createLogger({
     format: winston.format.combine(
@@ -12,17 +19,20 @@ export const log: winston.Logger = winston.createLogger({
     level: 'silly',
     transports: [
         new winston.transports.Console({}),
-        new winston.transports.File({ 
-            filename: 'logs/all.log',
+        new winston.transports.File({
+            filename: 'all.log',
+            dirname: logDir,
             options: { flags: 'w' }, // overwrite log file on start 
         }),
         new winston.transports.File({
-            filename: 'logs/warn.log', 
+            filename: 'warn.log',
+            dirname: logDir, 
             level: 'warn',
             options: { flags: 'w' }, // overwrite log file on start 
         }),
     ],
+    exitOnError: false,
 });
 
-log.info('Starting Winston logger...');
+log.info('Starting Winston logger...')
 
