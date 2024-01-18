@@ -1,6 +1,6 @@
 import * as net from 'net'
 import { isPointWithinRadius, getDistance, getGreatCircleBearing } from 'geolib'
-// import { log } from '../log'
+import { log } from '../log'
 
 type Position = {
   lat: number
@@ -40,12 +40,18 @@ export class AircraftTracker {
 
   private readonly staleTimeoutMs = 10000
 
-  private timer?: NodeJS.Timer
+  private timer?: NodeJS.Timeout
 
   constructor() {
     this.socket.on('data', this.onSocketData.bind(this))
     this.socket.on('error', (err) => {
-      console.error('ADSB socket error: ', err)
+      log.error('ADSB socket error: ', err)
+    })
+    this.socket.on('end', () => {
+      log.error('ADSB socket end')
+    })
+    this.socket.on('close', () => {
+      log.error('ADSB socket close')
     })
   }
 
@@ -144,7 +150,7 @@ export class AircraftTracker {
         bearingFromHome: getGreatCircleBearing(this.homePos, plane.pos)
       }
 
-      console.log(`${plane.ident.callsign} is ${plane.relative?.distanceFromHome}m from home (bearing ${plane.relative?.bearingFromHome})`)
+      // console.log(`${plane.ident.callsign} is ${plane.relative?.distanceFromHome}m from home (bearing ${plane.relative?.bearingFromHome})`)
       if (isPointWithinRadius(plane.pos, this.homePos, radiusM)) {
         overhead.push(plane)
       }
@@ -161,7 +167,7 @@ export class AircraftTracker {
       // delete aircraft if haven't seen in some time
       if (diff > this.staleTimeoutMs) {
         delete this.aircraft[icao]
-        console.log(`--> Deleted stale aircraft (${Object.keys(aircraft).length}): ${aircraft.icao}`)
+        // console.log(`--> Deleted stale aircraft (${Object.keys(aircraft).length}): ${aircraft.icao}`)
       }
     }
   }

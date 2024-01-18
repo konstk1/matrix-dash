@@ -16,7 +16,7 @@ export abstract class Widget {
     protected matrix = matrix;
 
     protected updateIntervalMs: number = 0;
-    protected timer?: NodeJS.Timer;
+    protected timer?: NodeJS.Timeout;
 
     constructor(size: Size, border: number = 0) {
         this.size = size;
