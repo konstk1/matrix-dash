@@ -29,8 +29,6 @@ const options = {
 
 const bh1750 = new BH1750(options)
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-
 const bt = new BabyTracker()
 const chatgpt = new ChatGPT()
 
@@ -163,12 +161,6 @@ async function main() {
         page1.activate()
 
         setInterval(autoDimmer, 1000 * 1, page1)
-
-        while (true) {
-            await sleep(1000)
-        }
-
-        page1.deactivate()
     } catch (error) {
         console.error(error)
     }
