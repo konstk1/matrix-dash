@@ -22,6 +22,7 @@ export const log: winston.Logger = winston.createLogger({
         new winston.transports.File({
             filename: 'all.log',
             dirname: logDir,
+            level: 'info',
             options: { flags: 'w' }, // overwrite log file on start 
         }),
         new winston.transports.File({

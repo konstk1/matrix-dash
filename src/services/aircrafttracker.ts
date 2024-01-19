@@ -47,11 +47,8 @@ export class AircraftTracker {
     this.socket.on('error', (err) => {
       log.error('ADSB socket error: ', err)
     })
-    this.socket.on('end', () => {
-      log.error('ADSB socket end')
-    })
     this.socket.on('close', () => {
-      log.error('ADSB socket close')
+      log.error('ADSB socket closed')
     })
   }
 
