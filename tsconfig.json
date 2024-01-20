@@ -16,7 +16,7 @@
       "noImplicitOverride": true,
       "noUnusedLocals": true,
       "skipLibCheck": true,
-      "sourceMap": false,
+      "sourceMap": true,
       "strictNullChecks": true,
       "strict": true,
       "suppressImplicitAnyIndexErrors": false,

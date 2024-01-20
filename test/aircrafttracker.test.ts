@@ -1,10 +1,6 @@
 import { AircraftInfo, AircraftTracker } from '../src/services/aircrafttracker'
 import { getAltitudeColor } from '../src/widgets/aircraft-widget'
-import { readTestDataFile } from './utils'
-
-async function sleepMs(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
+import { readTestDataFile, sleepMs } from './utils'
 
 describe('AircraftTracker', () => {
   const tracker = new AircraftTracker()
