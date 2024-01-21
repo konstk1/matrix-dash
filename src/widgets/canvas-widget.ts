@@ -1,6 +1,6 @@
 import { Widget, Size } from './widget';
 // @ts-ignore
-import { log } from '../log';
+import log from '../log';
 
 type Rgb = { r: number, g: number, b: number };
 type Pixel = { 

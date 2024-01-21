@@ -1,5 +1,5 @@
 import { Widget } from './widget';
-import { log } from '../log';
+import log from '../log';
 // import { FontInstance } from 'rpi-led-matrix';
 
 export class TimerWidget extends Widget {

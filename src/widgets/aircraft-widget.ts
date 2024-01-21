@@ -1,7 +1,7 @@
 import { TextWidget } from './text-widget'
 import { AircraftTracker } from '../services/aircrafttracker'
 // @ts-ignore
-import { log } from '../log'
+import log from '../log'
 
 const altitudeBreaks = [42650, 41010, 39370, 37730, 36090, 34450, 32810, 31170,
     29530, 27890, 26250, 24610, 22970, 21330, 19690, 18050,
@@ -37,25 +37,26 @@ export class AircraftWidget extends TextWidget {
     // @ts-ignore
     protected override update(): void {
         // get closest aircraft
-        const aircraft = this.tracker.getOverheadAircraft(9000)
-        // find closest by distance
-        const closestAircraft = aircraft.reduce((prev, curr) => {
-            return (prev.relative?.distanceFromHome ?? 0) < (curr.relative?.distanceFromHome ?? 0) ? prev : curr
-        }, aircraft[0])
+        this.tracker.getOverheadAircraft(9000).then((aircraft) => {
+            // find closest by distance
+            const closestAircraft = aircraft.reduce((prev, curr) => {
+                return (prev.relative?.distanceFromHome ?? 0) < (curr.relative?.distanceFromHome ?? 0) ? prev : curr
+            }, aircraft[0])
 
-        // log.debug(`Closest aircraft: ${JSON.stringify(closestAircraft)}`)
+            log.debug(`Closest aircraft: ${JSON.stringify(closestAircraft)}`)
 
-        if (closestAircraft) {
+            if (closestAircraft) {
             // convert from meters to miles
-            const distMi = (closestAircraft.relative?.distanceFromHome ?? 0) * 0.621371 / 1000
-            // set color based on altitude
-            const altitude = closestAircraft.pos?.alt ?? 0
-            this.fgColor = getAltitudeColor(altitude)
-            this.setText(`${closestAircraft.ident?.callsign ?? 'N/A'} ${distMi.toFixed(1)}mi`)
-        } else {
-            this.setText('')
-        }
+                // const distMi = (closestAircraft.relative?.distanceFromHome ?? 0) * 0.621371 / 1000
+                // set color based on altitude
+                const altitude = closestAircraft.pos?.alt ?? 0
+                this.fgColor = getAltitudeColor(altitude)
+                this.setText(`${closestAircraft.flightInfo?.originAirport ?? 'N/A'} - ${closestAircraft.flightInfo?.destinationAirport ?? 'N/A'}`)
+            } else {
+                this.setText('')
+            }
 
-        super.update()
+            super.update()
+        })
     }
 }

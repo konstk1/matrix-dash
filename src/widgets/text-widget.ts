@@ -1,6 +1,6 @@
 import { Widget } from './widget';
 import { Font } from '../matrix';
-import { log } from '../log';
+import log from '../log'
 import { FontInstance } from 'rpi-led-matrix';
 
 export class TextWidget extends Widget {

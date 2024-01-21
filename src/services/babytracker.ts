@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 // import * as fs from 'fs';
-import { log } from '../log';
+import log from '../log';
 
 type UUID = string;
 

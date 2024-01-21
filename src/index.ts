@@ -10,7 +10,7 @@ import { ClockWidget } from './widgets/clock-widget'
 import { RouterWidget } from './widgets/router-widget'
 // @ts-ignore
 import { TextWidget } from './widgets/text-widget'
-import { log } from './log'
+import log from './log'
 // @ts-ignore
 import { BabyTracker } from './services/babytracker'
 // import { BufferWidget } from './src/widgets/buffer-widget';
