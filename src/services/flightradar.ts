@@ -92,6 +92,11 @@ export class FlightRadar {
     if (!this.flights[icao]) {
       log.info(`Fetching flight info for ${icao}, last 24 hrs: ${this.requestTimestamps.length}`)
       await this.fetchFlights()
+
+      for (const icao in this.flights) {
+        const f = this.flights[icao]
+        console.log(`  Flight ${f.icao}: ${f.originAirport} -> ${f.destinationAirport}`)
+      }
     }
     return this.flights[icao]
   }
