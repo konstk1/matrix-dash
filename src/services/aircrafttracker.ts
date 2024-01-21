@@ -1,6 +1,7 @@
 import * as net from 'net'
+import log from '../log'
 import { isPointWithinRadius, getDistance, getGreatCircleBearing } from 'geolib'
-import { log } from '../log'
+import { FlightRadar } from './flightradar'
 
 type Position = {
   lat: number
@@ -29,6 +30,8 @@ export class AircraftTracker {
   private readonly adsbPort = Number(process.env.ADSB_PORT) || 30003
 
   private socket = new net.Socket()
+
+  private flightRadar = new FlightRadar()
 
   private readonly aircraft: Record<string, AircraftInfo> = {}
 
@@ -132,7 +135,7 @@ export class AircraftTracker {
     return this.aircraft[icao]
   }
 
-  getOverheadAircraft(radiusM: number): AircraftInfo[] {
+  async getOverheadAircraft(radiusM: number): Promise<AircraftInfo[]> {
     const overhead: AircraftInfo[] = []
 
     for (const icao in this.aircraft) {
@@ -149,6 +152,15 @@ export class AircraftTracker {
 
       // console.log(`${plane.ident.callsign} is ${plane.relative?.distanceFromHome}m from home (bearing ${plane.relative?.bearingFromHome})`)
       if (isPointWithinRadius(plane.pos, this.homePos, radiusM)) {
+        if (!plane.flightInfo) {
+          const flightInfo = await this.flightRadar.getFlightInfo(plane.icao)
+          if (flightInfo) {
+            plane.flightInfo = {
+              originAirport: flightInfo.originAirport,
+              destinationAirport: flightInfo.destinationAirport,
+            }
+          }
+        }
         overhead.push(plane)
       }
     }

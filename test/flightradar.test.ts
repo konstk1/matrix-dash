@@ -12,8 +12,6 @@ describe('FlightRadar', () => {
     const data = readTestDataFile('fr24_feed.json')
     mocked(axios).get.mockResolvedValue({ data: JSON.parse(data) })
 
-    await fr.fetchFlights()
-
     const expected: any = {
       'A4347B': {
         icao: 'A4347B',
@@ -33,8 +31,14 @@ describe('FlightRadar', () => {
     }
 
     for (const icao in expected) {
-      const flight = fr.getFlightInfo(icao)
+      const flight = await fr.getFlightInfo(icao)
       expect(flight).toEqual(expected[icao])
     }
+
+    expect(axios.get).toHaveBeenCalledTimes(1)
+  })
+
+  it.skip('Fetches FR24 feed', async () => {
+    await fr.fetchFlights()
   })
 })

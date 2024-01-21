@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import * as WebSocket from 'ws';
 import * as qs from 'qs';
 import * as https from 'https';
-import { log } from '../log';
+import log from '../log';
 
 /**
  * Interface to the EdgeMax API.

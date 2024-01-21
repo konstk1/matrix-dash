@@ -7,7 +7,7 @@ if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir)
 }
 
-export const log: winston.Logger = winston.createLogger({
+const log: winston.Logger = winston.createLogger({
     format: winston.format.combine(
         winston.format.timestamp({
             format: 'YYYY-MM-DD HH:mm:ss.SSS'
@@ -37,3 +37,4 @@ export const log: winston.Logger = winston.createLogger({
 
 log.info('Starting Winston logger...')
 
+export default log

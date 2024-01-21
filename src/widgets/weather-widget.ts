@@ -1,7 +1,7 @@
 import { TextWidget } from './text-widget';
 import { Weather } from '../services/weather';
 import { Color } from '../utils';
-import { log } from '../log';
+import log from '../log';
 
 export class WeatherWidget extends TextWidget {
     protected override updateIntervalMs = 5 * 60 * 1000; // 5 mins
