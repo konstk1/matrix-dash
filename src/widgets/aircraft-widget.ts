@@ -13,6 +13,8 @@ const altitudeColors = [0xFF0000, 0xFF00E4, 0xD800FF, 0xAE00FF, 0x9600FF, 0x7800
   0x0096FF, 0x00A8FF, 0x00C0FF, 0x00EAFF, 0x00FFE4, 0x00FFD2, 0x00FF9C, 0x00FF72,
   0x00FF36, 0x00FF0C, 0x1EFF00, 0x42FF00, 0xCCFF00, 0xF0FF00, 0xFFEA00, 0xFFE062, 0xFFFFFF]
 
+const headingArrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖']
+
 export function getAltitudeColor(altitude: number) {
   for (let i = 0; i < altitudeBreaks.length; i++) {
     if (altitude >= altitudeBreaks[i]) {
@@ -20,6 +22,21 @@ export function getAltitudeColor(altitude: number) {
     }
   }
   return 0xFFFFFF
+}
+
+export function getDistanceColor(distMi: number) {
+  // scale altitude palette from 0 to 5 mi
+  const numColors = altitudeColors.length
+  const progress = distMi / 6
+  const idx = Math.floor(progress * numColors)
+  return altitudeColors[numColors - idx - 1]
+}
+
+
+export function getHeadingArrow(heading: number) {
+  // house offset 45 degrees
+  const index = Math.floor((heading - 45 + 360) / 45) % 8
+  return headingArrows[index]
 }
 
 export class AircraftWidget extends TextWidget {
@@ -44,18 +61,15 @@ export class AircraftWidget extends TextWidget {
       }, aircraft[0])
 
       if (closestAircraft) {
-
-      }
-
-      if (closestAircraft) {
-        // log.debug(`Closest aircraft: ${JSON.stringify(closestAircraft)}`)
+        log.debug(`Closest aircraft: ${closestAircraft.icao} ${closestAircraft.relative?.distanceFromHome} ${closestAircraft.relative?.bearingFromHome}`)
 
         // convert from meters to miles
         // const distMi = (closestAircraft.relative?.distanceFromHome ?? 0) * 0.621371 / 1000
         // set color based on altitude
         const altitude = closestAircraft.pos?.alt ?? 0
         this.fgColor = getAltitudeColor(altitude)
-        this.setText(`${closestAircraft.flightInfo?.originAirport || 'N/A'} - ${closestAircraft.flightInfo?.destinationAirport || 'N/A'}`)
+        const headingArrow = closestAircraft.relative?.bearingFromHome ? getHeadingArrow(closestAircraft.relative.bearingFromHome) : '*'
+        this.setText(`${closestAircraft.flightInfo?.originAirport || 'N/A'} ⇒ ${closestAircraft.flightInfo?.destinationAirport || 'N/A'} ${headingArrow}`)
       } else {
         this.setText('')
       }
