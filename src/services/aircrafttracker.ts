@@ -58,7 +58,7 @@ export class AircraftTracker {
   start() {
     // open tcp socket to ADSB host
     this.socket.connect(this.adsbPort, this.adsbHost, () => {
-      console.log('Connected to ADSB host')
+      log.info('Connected to ADSB host')
     })
 
     this.timer = setInterval(this.cleanStaleAircraft.bind(this), 1000)

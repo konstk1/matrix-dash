@@ -35,7 +35,8 @@ export function getDistanceColor(distMi: number) {
 
 export function getHeadingArrow(heading: number) {
   // house offset 45 degrees
-  const index = Math.floor((heading - 45 + 360) / 45) % 8
+  const index = Math.round((heading - 45 + 360) / 45) % 8
+  console.log(`Heading: ${heading.toFixed(0)} Index: ${index} Arrow: ${headingArrows[index]}`)
   return headingArrows[index]
 }
 
@@ -61,7 +62,8 @@ export class AircraftWidget extends TextWidget {
       }, aircraft[0])
 
       if (closestAircraft) {
-        log.debug(`Closest aircraft: ${closestAircraft.icao} ${closestAircraft.relative?.distanceFromHome} ${closestAircraft.relative?.bearingFromHome}`)
+        log.debug(`Closest aircraft: ${closestAircraft.icao} ${closestAircraft.relative?.distanceFromHome}m ${closestAircraft.relative?.bearingFromHome.toFixed(0)}°`)
+        log.debug(`${closestAircraft.flightInfo?.originAirport || 'N/A'} ⇒ ${closestAircraft.flightInfo?.destinationAirport || 'N/A'}`)
 
         // convert from meters to miles
         // const distMi = (closestAircraft.relative?.distanceFromHome ?? 0) * 0.621371 / 1000
