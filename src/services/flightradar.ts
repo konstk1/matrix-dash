@@ -107,8 +107,8 @@ export class FlightRadar {
   async getFlightInfo(icao: string): Promise<FlightInfo | undefined> {
     // fetch flights if this icao is not in the cache
     if (!this.flights[icao] && !this.rateLimitRequests(10)) {
-      const hoursSinceFirstRequest = (new Date().getTime() - this.requestTimestamps[0].getTime()) / 1000 / 60 / 60
-      log.info(`Fetching icao ${icao}, rate: ${this.requestTimestamps.length} in ${hoursSinceFirstRequest.toFixed(1)}h (${this.requestTimestamps.length / hoursSinceFirstRequest / 60} req/h)`)
+      const hoursSinceFirstRequest = (new Date().getTime() - this.requestTimestamps[0]?.getTime()) / 1000 / 60 / 60
+      log.info(`Fetching icao ${icao}, rate: ${this.requestTimestamps.length} in ${hoursSinceFirstRequest.toFixed(1)}h (${(this.requestTimestamps.length / hoursSinceFirstRequest).toFixed(1)} req/h)`)
       await this.fetchFlights()
 
       for (const icao in this.flights) {
