@@ -30,7 +30,22 @@ export class FlightRadar {
     this.requestTimestamps = this.requestTimestamps.filter((d) => d > yesterday)
   }
 
-  async fetchFlights(): Promise<any> {
+  private rateLimitRequests(minIntervalSec: number): boolean {
+    // limit requests to 1 per 10 seconds
+    if (this.requestTimestamps.length > 0) {
+      const now = new Date()
+      const lastRequest = this.requestTimestamps[this.requestTimestamps.length - 1]
+      const elapsed = now.getTime() - lastRequest.getTime()
+      if (elapsed < 10 * 1000) {
+        log.info(`Waiting ${(10 - elapsed / 1000).toFixed(0)} seconds before fetching FR24 feed`)
+        return true
+      }
+    }
+
+    return false
+  }
+
+  async fetchFlights(): Promise<void> {
     const options = {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
@@ -72,15 +87,17 @@ export class FlightRadar {
 
   private processFlightRadarMessage(data: (number | string)[]): FlightInfo | undefined {
     const icao = data[1] as string
+    const aircraftCode = data[9] as string
     const originAirport = data[12] as string
     const destinationAirport = data[13] as string
 
-    if (!icao) {
+    if (!icao && !aircraftCode) {
       return undefined
     }
 
     const info: FlightInfo = {
-      icao,
+      // if icao is blank, use callsign
+      icao: icao || aircraftCode,
       originAirport,
       destinationAirport,
     }
@@ -89,8 +106,9 @@ export class FlightRadar {
 
   async getFlightInfo(icao: string): Promise<FlightInfo | undefined> {
     // fetch flights if this icao is not in the cache
-    if (!this.flights[icao]) {
-      log.info(`Fetching flight info for ${icao}, last 24 hrs: ${this.requestTimestamps.length}`)
+    if (!this.flights[icao] && !this.rateLimitRequests(10)) {
+      const hoursSinceFirstRequest = (new Date().getTime() - this.requestTimestamps[0].getTime()) / 1000 / 60 / 60
+      log.info(`Fetching icao ${icao}, rate: ${this.requestTimestamps.length} in ${hoursSinceFirstRequest.toFixed(1)}h (${this.requestTimestamps.length / hoursSinceFirstRequest / 60} req/h)`)
       await this.fetchFlights()
 
       for (const icao in this.flights) {
