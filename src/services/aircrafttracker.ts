@@ -51,16 +51,20 @@ export class AircraftTracker {
       log.error('ADSB socket error: ', err)
     })
     this.socket.on('close', () => {
-      log.error('ADSB socket closed')
+      log.warn('ADSB socket closed, reconnecting...')
+      this.connectAdsbSocket()
     })
   }
 
-  start() {
+  private connectAdsbSocket() {
     // open tcp socket to ADSB host
     this.socket.connect(this.adsbPort, this.adsbHost, () => {
       log.info('Connected to ADSB host')
     })
+  }
 
+  start() {
+    this.connectAdsbSocket()
     this.timer = setInterval(this.cleanStaleAircraft.bind(this), 1000)
   }
 
