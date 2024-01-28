@@ -60,7 +60,7 @@ export abstract class Widget {
                 log.warn(`Timer ${this.timer} already exist`);
             } else {
                 this.timer = setInterval(this.update.bind(this), this.updateIntervalMs);
-                log.debug(`Timer ${this.timer} activated`);
+                // log.debug(`Timer ${this.timer} activated`);
             }
         }
     }
@@ -68,7 +68,7 @@ export abstract class Widget {
     public deactivate(): void {
         log.warn(`${this.constructor.name}: deactivate widget`);
         if (this.timer) {
-            log.debug(`Timer ${this.timer} deactivated`);
+            // log.debug(`Timer ${this.timer} deactivated`);
             clearInterval(this.timer);
         }
     }
