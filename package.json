@@ -15,7 +15,8 @@
     "watch": "sudo nodemon -w dist --delay 1 --exec \"node dist/src/index.js\"",
     "sync": "npm run build && ./sync.sh",
     "sim": "NODE_ENV=test npm start",
-    "test": "jest"
+    "test": "jest",
+    "testwatch": "jest --watch"
   },
   "dependencies": {
     "axios": "^1.6.1",
