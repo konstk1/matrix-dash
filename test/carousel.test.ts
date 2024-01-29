@@ -22,7 +22,7 @@ describe('Carousel', () => {
     const carousel = new CarouselWidget({ width: 10, height: 10 })
     expect(carousel.numWidgets()).toBe(0)
 
-    carousel.addWidget(widget1, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
+    carousel.addWidget(widget1, { displayTimeSec: 2, defaultPriority: 0, activePriority: 0 })
     carousel.addWidget(widget2, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
 
     expect(carousel.numWidgets()).toBe(2)
@@ -30,10 +30,16 @@ describe('Carousel', () => {
     carousel.activate()
     expect(carousel.activeWidget()).toBe(widget1)
 
-    jest.advanceTimersByTime(5000)
+    // expect widget 1 to only advance to widget 2 after 2 seconds
+    jest.advanceTimersByTime(1500)
+    expect(carousel.activeWidget()).toBe(widget1)
+    jest.advanceTimersByTime(500)
     expect(carousel.activeWidget()).toBe(widget2)
 
-    jest.advanceTimersByTime(5000)
+    // expect widget 2 to only advance to widget 1 after 5 seconds
+    jest.advanceTimersByTime(4000)
+    expect(carousel.activeWidget()).toBe(widget2)
+    jest.advanceTimersByTime(1000)
     expect(carousel.activeWidget()).toBe(widget1)
   })
 
