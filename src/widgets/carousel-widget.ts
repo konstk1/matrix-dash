@@ -22,6 +22,14 @@ export class CarouselWidget extends Widget {
     super(size, border)
   }
 
+  public override activate(): void {
+    this.widgets.forEach(w => w.widget.activate())
+  }
+
+  public override deactivate(): void {
+    this.widgets.forEach(w => w.widget.deactivate())
+  }
+
   public addWidget(widget: Widget,
     { displayTimeSec, defaultPriority, activePriority }:
       { displayTimeSec: number, defaultPriority: number, activePriority: number }) {
@@ -44,6 +52,10 @@ export class CarouselWidget extends Widget {
   }
 
   public activeWidget(): Widget | undefined {
+    // set current widget origin to this origin
+    if (this.currentWidget) {
+      this.currentWidget.widget.origin = this.origin
+    }
     return this.currentWidget?.widget
   }
 
@@ -51,6 +63,10 @@ export class CarouselWidget extends Widget {
     // find the highest priority widgets that are not the current widget
     const highestPriority = Math.max(...this.widgets.map(w => w.priority))
     const highestWidgets = this.widgets.filter(w => w.priority == highestPriority && w.widget != this.activeWidget())
+    if (highestWidgets.length == 0) {
+      return
+    }
+
     // find oldest displayed widget
     const oldestWidget = highestWidgets.reduce((prev, curr) => {
       return curr.lastDisplayTime < prev.lastDisplayTime ? curr : prev
@@ -67,7 +83,7 @@ export class CarouselWidget extends Widget {
     this.currentWidget.lastDisplayTime = Date.now()
     this.widgetDisplayTimer = setInterval(this.activateNextWidget.bind(this), this.currentWidget.displayTimeSec * 1000)
 
-    log.debug(`CarouselWidget: switching to widget ${this.widgets.indexOf(this.currentWidget)}`)
+    log.info(`CarouselWidget: switching to widget ${this.widgets.indexOf(this.currentWidget)}`)
   }
 
   public override draw(sync: boolean = true): void {
