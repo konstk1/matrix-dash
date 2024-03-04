@@ -1,15 +1,15 @@
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi } from 'openai'
 
 
 export class ChatGPT {
-  private readonly openai: OpenAIApi;
+  private readonly openai: OpenAIApi
 
   constructor() {
     const configuration = new Configuration({
       apiKey: process.env.OPENAI_API_KEY,
-    });
-    
-    this.openai = new OpenAIApi(configuration);
+    })
+
+    this.openai = new OpenAIApi(configuration)
   }
 
   public async generate(prompt: string): Promise<string | undefined> {
@@ -19,13 +19,13 @@ export class ChatGPT {
       // temperature: 1.3,
       // top_p: .1,
       n: 1,
-    });
+    })
 
     console.log('ChatGPT usage: ', response.data.usage)
 
     console.log(response.data.choices.map((c) => c.text?.trim()).join('\n'))
-    
-    return response.data.choices[0].text?.trim();
+
+    return response.data.choices[0].text?.trim()
   }
 
   public async generateChat(prompt: string): Promise<string | undefined> {
@@ -42,8 +42,8 @@ export class ChatGPT {
 
     console.log('ChatGPT usage: ', response.data.usage)
 
-    console.log(response.data.choices);
+    console.log(response.data.choices)
 
-    return response.data.choices[0].message?.content?.trim();
+    return response.data.choices[0].message?.content?.trim()
   }
 }

@@ -1,11 +1,11 @@
-import { BabyTracker } from '../src/services/babytracker';
+import { BabyTracker } from '../src/services/babytracker'
 
 describe('BabyTracker', () => {
-  const bt = new BabyTracker();
+  const bt = new BabyTracker()
 
   beforeAll(async () => {
-    await bt.login();
-  });
+    await bt.login()
+  })
 
   // it('Fetches sync info', async () => {
   //     const devInfo = await bt.sync();
@@ -18,6 +18,6 @@ describe('BabyTracker', () => {
   // });
 
   it.only('Syncs', async () => {
-    await bt.sync();
-  });
-});
+    await bt.sync()
+  })
+})
