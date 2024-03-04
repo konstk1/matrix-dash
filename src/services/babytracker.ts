@@ -22,6 +22,11 @@ type EventInfo = {
     baby: string,
 }
 
+type MedicationInfo = {
+    ibuprofen: Date,
+    acetaminophen: Date,
+}
+
 export class BabyTracker {
     private readonly email = process.env.BABYTRACKER_EMAIL;
     private readonly password = process.env.BABYTRACKER_PASSWORD;
@@ -40,8 +45,10 @@ export class BabyTracker {
     lastFeedingTime: Date = new Date(0);
     lastStartSide = '';
 
-    lastIbuprofenTime: Date = new Date(0);
-    lastAcetaminophenTime: Date = new Date(0);
+    // lastIbuprofenTime: Date = new Date(0);
+    // lastAcetaminophenTime: Date = new Date(0);
+
+    lastMeds: Record<string, MedicationInfo> = {};
 
     constructor() {
         if (!this.email || !this.password) {
@@ -86,6 +93,24 @@ export class BabyTracker {
         }
 
         return res.data;
+    }
+
+    public getLastMeds(name?: string): MedicationInfo | undefined {
+        // if no name or any, show most recent medication
+        if (!name || name === 'any') {
+            let mostRecent: MedicationInfo = { ibuprofen: new Date(0), acetaminophen: new Date(0) }
+            for (const baby in this.lastMeds) {
+                if (this.lastMeds[baby].ibuprofen > mostRecent.ibuprofen) {
+                    mostRecent.ibuprofen = this.lastMeds[baby].ibuprofen
+                }
+                if (this.lastMeds[baby].acetaminophen > mostRecent.acetaminophen) {
+                    mostRecent.acetaminophen = this.lastMeds[baby].acetaminophen
+                }
+            }
+            return mostRecent
+        }
+
+        return this.lastMeds[name]
     }
 
     async sync() {
@@ -217,17 +242,22 @@ export class BabyTracker {
             if (event.type === 'Medication') {
                 medications.push(event);
 
+                // get last medication times for this baby
+                const meds = this.lastMeds[event.baby] || { ibuprofen: new Date(0), acetaminophen: new Date(0) };
+
                 // update last ibuprofen time
-                if (event.medication === 'ibuprofen' && event.time > this.lastIbuprofenTime) {
-                    log.info(`Found more recent ibuprofen (ID ${event.syncID}): ${event.time.toLocaleString()}`)
-                    this.lastIbuprofenTime = event.time;
+                if (event.medication === 'ibuprofen' && event.time > meds.ibuprofen) {
+                    log.info(`Found more recent ibuprofen for ${event.baby} (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+                    meds.ibuprofen = event.time;
                 }
 
                 // update last acetaminophen time
-                if (event.medication === 'acetaminophen' && event.time > this.lastAcetaminophenTime) {
-                    log.info(`Found more recent acetaminophen (ID ${event.syncID}): ${event.time.toLocaleString()}`)
-                    this.lastAcetaminophenTime = event.time;
+                if (event.medication === 'acetaminophen' && event.time > meds.acetaminophen) {
+                    log.info(`Found more recent acetaminophen ${event.baby} (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+                    meds.acetaminophen = event.time;
                 }
+
+                this.lastMeds[event.baby] = meds;
             }
         }
         console.log(medications);
