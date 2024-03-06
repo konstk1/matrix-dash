@@ -248,12 +248,14 @@ export class BabyTracker {
         // update last ibuprofen time
         if (event.medication === 'ibuprofen' && event.time > meds.ibuprofen) {
           log.info(`Found more recent ibuprofen for ${event.baby} (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+          log.info(`Found more recent ibuprofen for ${event.baby} (ID ${event.syncID}): ${event.time}`)
           meds.ibuprofen = event.time
         }
 
         // update last acetaminophen time
         if (event.medication === 'acetaminophen' && event.time > meds.acetaminophen) {
           log.info(`Found more recent acetaminophen ${event.baby} (ID ${event.syncID}): ${event.time.toLocaleString()}`)
+          log.info(`Found more recent acetaminophen ${event.baby} (ID ${event.syncID}): ${event.time}`)
           meds.acetaminophen = event.time
         }
 
