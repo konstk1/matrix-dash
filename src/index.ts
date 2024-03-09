@@ -135,31 +135,31 @@ async function main() {
 
     const page1 = new Page('page1')
 
-    // const clock = new ClockWidget({ width: 32, height: 16 }, 0)
-    // page1.addWidget(clock, { x: 0, y: 0 })
+    const clock = new ClockWidget({ width: 32, height: 16 }, 0)
+    page1.addWidget(clock, { x: 0, y: 0 })
 
-    // const weather = new WeatherWidget({ width: 32, height: 16 }, 0)
-    // page1.addWidget(weather, { x: 32, y: 0 })
+    const weather = new WeatherWidget({ width: 32, height: 16 }, 0)
+    page1.addWidget(weather, { x: 32, y: 0 })
 
-    const scrollerTop = new TextWidget({ width: 64, height: 16 }, 0)
-    scrollerTop.setText(await getScrollerMessage('Maya'))
-    scrollerTop.scrollSpeed = SCROLLER_SCROLL_SPEED
-    scrollerTop.fgColor = 0xfa0a92 // ping
-    page1.addWidget(scrollerTop, { x: 0, y: 0 })
+    // const scrollerTop = new TextWidget({ width: 64, height: 16 }, 0)
+    // scrollerTop.setText(await getScrollerMessage('Maya'))
+    // scrollerTop.scrollSpeed = SCROLLER_SCROLL_SPEED
+    // scrollerTop.fgColor = 0xfa0a92 // ping
+    // page1.addWidget(scrollerTop, { x: 0, y: 0 })
 
-    const scrollerBottom = new TextWidget({ width: 64, height: 16 }, 0)
-    scrollerBottom.setText(await getScrollerMessage('Kai'))
-    scrollerBottom.scrollSpeed = SCROLLER_SCROLL_SPEED
-    scrollerBottom.fgColor = 0xeb9b34 // orange
-    page1.addWidget(scrollerBottom, { x: 0, y: 16 })
+    // const scrollerBottom = new TextWidget({ width: 64, height: 16 }, 0)
+    // scrollerBottom.setText(await getScrollerMessage('Kai'))
+    // scrollerBottom.scrollSpeed = SCROLLER_SCROLL_SPEED
+    // scrollerBottom.fgColor = 0xeb9b34 // orange
+    // page1.addWidget(scrollerBottom, { x: 0, y: 16 })
 
-    setInterval(async () => {
-      scrollerTop.setText(await getScrollerMessage('Maya'))
-      scrollerBottom.setText(await getScrollerMessage('Kai'))
-    }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
+    // setInterval(async () => {
+    //   // scrollerTop.setText(await getScrollerMessage('Maya'))
+    //   scrollerBottom.setText(await getScrollerMessage('any'))
+    // }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
 
-    // const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
-    // page1.addWidget(aircraft, { x: 0, y: 16 })
+    const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
+    page1.addWidget(aircraft, { x: 0, y: 16 })
 
     // const canvas = new CanvasWidget({ width: 64, height: 18 }, 0)
     // page1.addWidget(canvas, { x: 0, y: 16 })
