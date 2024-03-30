@@ -34,7 +34,10 @@ export class TextWidget extends Widget {
     }
 
     this.textOffset = this.scrollSpeed == 0 ? this.origin.x + this.textOffset : this.matrix.width()
-    this.draw(true)
+
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 
   public override draw(sync: boolean = true): void {
@@ -73,7 +76,9 @@ export class TextWidget extends Widget {
       }
     }
 
-    this.draw(true)
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 
   public override activate(): void {

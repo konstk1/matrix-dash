@@ -67,7 +67,9 @@ export class TimerWidget extends Widget {
 
     log.debug(`Timer: elapsed ${elapsedMs} / ${this.durationMs} ms, ${this.pixelsToFill} / ${totalPixels} pixels to fill`)
 
-    this.draw(true)
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 
   public start(durationSec: number): void {

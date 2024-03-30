@@ -30,7 +30,10 @@ export class RouterWidget extends TextWidget {
             const downStr = String(Math.round(down)).padStart(3, ' ');
 
             this.setText(` ↑${upStr}${upUnits} ↓${downStr}${downUnits}`);
-            this.draw(true);
+
+            if (this.isActive) {
+                this.draw(true)
+            }
         };
     }
 }

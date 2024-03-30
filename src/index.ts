@@ -158,16 +158,19 @@ async function main() {
     //   scrollerBottom.setText(await getScrollerMessage('any'))
     // }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
 
-    const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
-    page1.addWidget(aircraft, { x: 0, y: 16 })
+    // const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
+    // page1.addWidget(aircraft, { x: 0, y: 16 })
 
-    // const canvas = new CanvasWidget({ width: 64, height: 18 }, 0)
+    const canvas = new CanvasWidget({ width: 64, height: 16 }, 0)
+    const text = new TextWidget({ width: 64, height: 16 }, 0)
+    text.setText('Carousel')
+
     // page1.addWidget(canvas, { x: 0, y: 16 })
 
-    // const carousel = new CarouselWidget({ width: 64, height: 16 })
-    // carousel.addWidget(scroller, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
-    // carousel.addWidget(aircraft, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
-    // page1.addWidget(carousel, { x: 0, y: 16 })
+    const carousel = new CarouselWidget({ width: 64, height: 16 })
+    carousel.addWidget(canvas, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
+    carousel.addWidget(text, { displayTimeSec: 5, defaultPriority: 0, activePriority: 0 })
+    page1.addWidget(carousel, { x: 0, y: 16 })
 
     page1.activate()
 

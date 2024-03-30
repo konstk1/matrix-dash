@@ -64,6 +64,8 @@ export class WeatherWidget extends TextWidget {
       log.error('Error getting weather:', error)
     }
 
-    this.draw(true)
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 }
