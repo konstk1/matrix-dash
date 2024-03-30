@@ -23,7 +23,8 @@ export class CarouselWidget extends Widget {
   }
 
   public override activate(): void {
-    this.widgets.forEach(w => w.widget.activate())
+    // this.widgets.forEach(w => w.widget.activate())
+    this.activateNextWidget()
   }
 
   public override deactivate(): void {
@@ -42,9 +43,9 @@ export class CarouselWidget extends Widget {
       lastDisplayTime: 0,
     })
 
-    if (!this.currentWidget || this.currentWidget.priority < defaultPriority) {
-      this.activateNextWidget()
-    }
+    // if (!this.currentWidget || this.currentWidget.priority < defaultPriority) {
+    //   this.activateNextWidget()
+    // }
   }
 
   public numWidgets(): number {
@@ -52,10 +53,6 @@ export class CarouselWidget extends Widget {
   }
 
   public activeWidget(): Widget | undefined {
-    // set current widget origin to this origin
-    if (this.currentWidget) {
-      this.currentWidget.widget.origin = this.origin
-    }
     return this.currentWidget?.widget
   }
 
@@ -76,11 +73,19 @@ export class CarouselWidget extends Widget {
       return
     }
 
+    this.currentWidget?.widget.deactivate()
     clearInterval(this.widgetDisplayTimer)
 
     // set interval to display the next widget
     this.currentWidget = oldestWidget
     this.currentWidget.lastDisplayTime = Date.now()
+
+    // set current widget origin to this origin
+    if (this.currentWidget) {
+      this.currentWidget.widget.origin = this.origin
+    }
+    this.currentWidget?.widget.activate()
+
     this.widgetDisplayTimer = setInterval(this.activateNextWidget.bind(this), this.currentWidget.displayTimeSec * 1000)
 
     log.info(`CarouselWidget: switching to widget ${this.widgets.indexOf(this.currentWidget)}`)

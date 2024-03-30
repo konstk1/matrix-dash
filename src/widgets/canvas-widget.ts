@@ -23,8 +23,6 @@ export class CanvasWidget extends Widget {
 
   constructor(size: Size, border: number = 0) {
     super(size, border)
-
-    this.canvas = [...Array(size.width)].map(e => Array(size.height))
   }
 
   public override draw(sync: boolean = true): void {
@@ -123,11 +121,14 @@ export class CanvasWidget extends Widget {
     //     // this.canvas[x][yy] = { r: 255, g: 0, b: 0 };
     // }
 
-    this.draw(true)
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 
   public override activate(): void {
     this.startTime = new Date()
+    this.canvas = [...Array(this.size.width)].map(e => Array(this.size.height))
     super.activate()
   }
 

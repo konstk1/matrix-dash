@@ -12,6 +12,8 @@ export abstract class Widget {
   public fgColor = 0xFFFFFF;
   public bgColor = 0x000000;
 
+  protected isActive = false;
+
   // @ts-ignore
   protected matrix = matrix;
 
@@ -47,12 +49,16 @@ export abstract class Widget {
   }
 
   protected update(): void {
-    this.draw(true)
+    // draw only when active
+    if (this.isActive) {
+      this.draw(true)
+    }
   }
 
   // default activation is timer based
   public activate(): void {
     log.warn(`${this.constructor.name}: activate widget`)
+    this.isActive = true
     this.update()
 
     if (this.updateIntervalMs > 0) {
@@ -67,9 +73,11 @@ export abstract class Widget {
 
   public deactivate(): void {
     log.warn(`${this.constructor.name}: deactivate widget`)
+    this.isActive = false
     if (this.timer) {
     // log.debug(`Timer ${this.timer} deactivated`);
       clearInterval(this.timer)
+      this.timer = undefined
     }
   }
 }
