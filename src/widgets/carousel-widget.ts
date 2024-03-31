@@ -3,7 +3,7 @@ import log from '../log'
 
 type WidgetEntry = {
   widget: Widget,
-  displayTimeSec: number,
+  displayTimeSec: number, // 0 means display indefinitely
   priority: number,
   defaultPriority: number,
   activePriority: number,
@@ -86,7 +86,9 @@ export class CarouselWidget extends Widget {
     }
     this.currentWidget?.widget.activate()
 
-    this.widgetDisplayTimer = setInterval(this.activateNextWidget.bind(this), this.currentWidget.displayTimeSec * 1000)
+    if (this.currentWidget.displayTimeSec > 0) {
+      this.widgetDisplayTimer = setInterval(this.activateNextWidget.bind(this), this.currentWidget.displayTimeSec * 1000)
+    }
 
     log.info(`CarouselWidget: switching to widget ${this.widgets.indexOf(this.currentWidget)}`)
   }
