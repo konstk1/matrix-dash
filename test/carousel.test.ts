@@ -1,13 +1,15 @@
 
+import { eventEmitter } from '../src/events'
 import { CarouselWidget } from '../src/widgets/carousel-widget'
 import { Widget } from '../src/widgets/widget'
 
 class TestWidget extends Widget {
   public fireEvent() {
-
+    eventEmitter.emit('startEvent', this)
   }
 
   public endEvent() {
+    eventEmitter.emit('endEvent', this)
   }
 }
 
@@ -17,6 +19,10 @@ describe('Carousel', () => {
   const widget1 = new TestWidget({ width: 10, height: 10 })
   const widget2 = new TestWidget({ width: 10, height: 10 })
   const widget3 = new TestWidget({ width: 10, height: 10 })
+
+  widget1.fgColor = 0x111111
+  widget2.fgColor = 0x222222
+  widget3.fgColor = 0x333333
 
   test('switches widgets on timer', () => {
     const carousel = new CarouselWidget({ width: 10, height: 10 })
@@ -65,7 +71,7 @@ describe('Carousel', () => {
   test('switches to widget with event', () => {
     const carousel = new CarouselWidget({ width: 10, height: 10 })
 
-    carousel.addWidget(widget1, { displayTimeSec: 0, defaultPriority: 0, activePriority: 0 })
+    carousel.addWidget(widget1, { displayTimeSec: 0, defaultPriority: 0, activePriority: 6 })
     carousel.addWidget(widget2, { displayTimeSec: 0, defaultPriority: 0, activePriority: 5 })
 
     carousel.activate()
@@ -76,6 +82,13 @@ describe('Carousel', () => {
     expect(carousel.activeWidget()).toBe(widget1)
 
     widget2.fireEvent()
+    expect(carousel.activeWidget()).toBe(widget2)
+
+    // widget 1 has higher active priority
+    widget1.fireEvent()
+    expect(carousel.activeWidget()).toBe(widget1)
+    // widget 2 returns after widget 1 event is done
+    widget1.endEvent()
     expect(carousel.activeWidget()).toBe(widget2)
 
     // expect widget 2 to be displayed until event is done

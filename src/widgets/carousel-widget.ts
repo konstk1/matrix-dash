@@ -1,3 +1,4 @@
+import { eventEmitter } from '../events'
 import { Widget } from './widget'
 import log from '../log'
 
@@ -20,6 +21,23 @@ export class CarouselWidget extends Widget {
 
   constructor(size: { width: number, height: number }, border: number = 0) {
     super(size, border)
+    eventEmitter.on('startEvent', (object: Widget) => {
+      console.log('startEvent: color ', object.fgColor)
+      // find the widget and set priority to active
+      const widget = this.widgets.find(w => w.widget == object)
+      if (widget) {
+        widget.priority = widget.activePriority
+      }
+      this.activateNextWidget()
+    })
+    eventEmitter.on('endEvent', (object: Widget) => {
+      console.log('endEvent: color ', object.fgColor)
+      const widget = this.widgets.find(w => w.widget == object)
+      if (widget) {
+        widget.priority = widget.defaultPriority
+      }
+      this.activateNextWidget()
+    })
   }
 
   public override activate(): void {
