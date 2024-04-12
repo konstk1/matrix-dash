@@ -1,4 +1,4 @@
-import { eventEmitter } from '../events'
+import { onWidgetEvent, type WidgetEvent } from '../events'
 import { Widget } from './widget'
 import log from '../log'
 
@@ -21,23 +21,34 @@ export class CarouselWidget extends Widget {
 
   constructor(size: { width: number, height: number }, border: number = 0) {
     super(size, border)
-    eventEmitter.on('startEvent', (object: Widget) => {
-      console.log('startEvent: color ', object.fgColor)
-      // find the widget and set priority to active
-      const widget = this.widgets.find(w => w.widget == object)
-      if (widget) {
-        widget.priority = widget.activePriority
-      }
-      this.activateNextWidget()
+
+    onWidgetEvent('RequestActive', (sender: any) => {
+      this.processWidgetEvent('RequestActive', sender)
     })
-    eventEmitter.on('endEvent', (object: Widget) => {
-      console.log('endEvent: color ', object.fgColor)
-      const widget = this.widgets.find(w => w.widget == object)
-      if (widget) {
-        widget.priority = widget.defaultPriority
-      }
-      this.activateNextWidget()
+
+    onWidgetEvent('EndActive', (sender: any) => {
+      this.processWidgetEvent('EndActive', sender)
     })
+  }
+
+  private processWidgetEvent(event: WidgetEvent, sender: any) {
+    const widget = this.widgets.find(w => w.widget == sender)
+
+    if (!widget) {
+      log.warn(`CarouselWidget: unknown widget ${sender}`)
+      return
+    }
+
+    if (event === 'RequestActive') {
+      widget.priority = widget.activePriority
+    } else if (event === 'EndActive') {
+      widget.priority = widget.defaultPriority
+    } else {
+      log.warn(`CarouselWidget: unknown event ${event}`)
+      return
+    }
+
+    this.activateNextWidget()
   }
 
   public override activate(): void {

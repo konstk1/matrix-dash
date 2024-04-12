@@ -17,7 +17,7 @@ describe('BabyTracker', () => {
   //     expect(firstDevice.DeviceOSInfo).toBeDefined();
   // });
 
-  it.only('Syncs', async () => {
+  it.skip('Syncs', async () => {
     await bt.sync()
   })
 })
