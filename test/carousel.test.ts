@@ -1,15 +1,15 @@
 
-import { eventEmitter } from '../src/events'
+import { emitWidgetEvent } from '../src/events'
 import { CarouselWidget } from '../src/widgets/carousel-widget'
 import { Widget } from '../src/widgets/widget'
 
 class TestWidget extends Widget {
   public fireEvent() {
-    eventEmitter.emit('startEvent', this)
+    emitWidgetEvent('RequestActive', this)
   }
 
   public endEvent() {
-    eventEmitter.emit('endEvent', this)
+    emitWidgetEvent('EndActive', this)
   }
 }
 

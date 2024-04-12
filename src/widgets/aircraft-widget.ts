@@ -1,5 +1,6 @@
 import { TextWidget } from './text-widget'
 import { AircraftTracker } from '../services/aircrafttracker'
+import { emitWidgetEvent } from '../events'
 // @ts-ignore
 import log from '../log'
 
@@ -41,8 +42,6 @@ export function getHeadingArrow(heading: number) {
 }
 
 export class AircraftWidget extends TextWidget {
-  protected override updateIntervalMs = 1000;
-
   private tracker: AircraftTracker = new AircraftTracker();
 
   protected override textOffset = 3;
@@ -50,10 +49,11 @@ export class AircraftWidget extends TextWidget {
   constructor(size: { width: number, height: number }, border = 0) {
     super(size, border)
     this.tracker.start()
+
+    setInterval(this.updateAircraft.bind(this), 1000)
   }
 
-  // @ts-ignore
-  protected override update(): void {
+  private updateAircraft() {
     // get closest aircraft
     this.tracker.getOverheadAircraft(9000).then((aircraft) => {
       // find closest by distance
@@ -72,11 +72,11 @@ export class AircraftWidget extends TextWidget {
         this.fgColor = getAltitudeColor(altitude)
         const headingArrow = closestAircraft.relative?.bearingFromHome ? getHeadingArrow(closestAircraft.relative.bearingFromHome) : '*'
         this.setText(`${closestAircraft.flightInfo?.originAirport || 'N/A'} ⇒ ${closestAircraft.flightInfo?.destinationAirport || 'N/A'} ${headingArrow}`)
+        emitWidgetEvent('RequestActive', this)
       } else {
         this.setText('')
+        emitWidgetEvent('EndActive', this)
       }
-
-      super.update()
     })
   }
 }
