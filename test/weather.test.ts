@@ -10,4 +10,6 @@ it('fetches weather', async () => {
   expect(current.tempF).toBeLessThan(110)
   expect(current.humidity).toBeGreaterThan(0)
   expect(current.humidity).toBeLessThanOrEqual(100)
+  expect(current.windSpeedMph).toBeGreaterThanOrEqual(0)
+  expect(current.uvIndex).toBeGreaterThanOrEqual(0)
 })
