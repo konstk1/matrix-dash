@@ -147,24 +147,29 @@ async function main() {
     // scrollerTop.fgColor = 0xfa0a92 // ping
     // page1.addWidget(scrollerTop, { x: 0, y: 0 })
 
-    // const scrollerBottom = new TextWidget({ width: 64, height: 16 }, 0)
-    // scrollerBottom.setText(await getScrollerMessage('Kai'))
-    // scrollerBottom.scrollSpeed = SCROLLER_SCROLL_SPEED
-    // scrollerBottom.fgColor = 0xeb9b34 // orange
-    // page1.addWidget(scrollerBottom, { x: 0, y: 16 })
 
-    // setInterval(async () => {
-    //   // scrollerTop.setText(await getScrollerMessage('Maya'))
-    //   scrollerBottom.setText(await getScrollerMessage('any'))
-    // }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
+    const showMeds = false
 
-    const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
-    const canvas = new CanvasWidget({ width: 64, height: 16 }, 0)
+    if (showMeds) {
+      const scrollerBottom = new TextWidget({ width: 64, height: 16 }, 0)
+      scrollerBottom.setText(await getScrollerMessage('any'))
+      scrollerBottom.scrollSpeed = SCROLLER_SCROLL_SPEED
+      scrollerBottom.fgColor = 0xeb9b34 // orange
+      page1.addWidget(scrollerBottom, { x: 0, y: 16 })
 
-    const carousel = new CarouselWidget({ width: 64, height: 16 })
-    carousel.addWidget(canvas, { displayTimeSec: 0, defaultPriority: 10, activePriority: 10 })
-    carousel.addWidget(aircraft, { displayTimeSec: 0, defaultPriority: 0, activePriority: 50 })
-    page1.addWidget(carousel, { x: 0, y: 16 })
+      setInterval(async () => {
+        // scrollerTop.setText(await getScrollerMessage('Maya'))
+        scrollerBottom.setText(await getScrollerMessage('any'))
+      }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
+    } else {
+      const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
+      const canvas = new CanvasWidget({ width: 64, height: 16 }, 0)
+
+      const carousel = new CarouselWidget({ width: 64, height: 16 })
+      carousel.addWidget(canvas, { displayTimeSec: 0, defaultPriority: 10, activePriority: 10 })
+      carousel.addWidget(aircraft, { displayTimeSec: 0, defaultPriority: 0, activePriority: 50 })
+      page1.addWidget(carousel, { x: 0, y: 16 })
+    }
 
     page1.activate()
 
