@@ -164,11 +164,26 @@ async function main() {
     } else {
       const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
       const canvas = new CanvasWidget({ width: 64, height: 16 }, 0)
+      const scroller = new TextWidget({ width: 64, height: 16 }, 0)
+      scroller.setText('6 7')
+      scroller.fgColor = 0x00FF00
 
       const carousel = new CarouselWidget({ width: 64, height: 16 })
       carousel.addWidget(canvas, { displayTimeSec: 0, defaultPriority: 10, activePriority: 10 })
       carousel.addWidget(aircraft, { displayTimeSec: 0, defaultPriority: 0, activePriority: 50 })
+      carousel.addWidget(scroller, { displayTimeSec: 0, defaultPriority: 0, activePriority: 100 })
       page1.addWidget(carousel, { x: 0, y: 16 })
+
+      // random scroller
+      const scheduleScroller = () => {
+        const delayMs = (5 + Math.random() * 1) * 60 * 1000
+        log.verbose(`Next scroller in ${(delayMs / 60000).toFixed(1)} min`)
+        setTimeout(() => {
+          scroller.scroll(2)
+          scheduleScroller()
+        }, delayMs)
+      }
+      scheduleScroller()
     }
 
     page1.activate()

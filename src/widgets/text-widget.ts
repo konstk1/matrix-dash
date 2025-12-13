@@ -2,6 +2,7 @@ import { Widget } from './widget'
 import { Font } from '../matrix'
 import log from '../log'
 import { FontInstance } from 'rpi-led-matrix'
+import { emitWidgetEvent } from '../events'
 
 export class TextWidget extends Widget {
   public fontName: string = '6x10';
@@ -17,6 +18,8 @@ export class TextWidget extends Widget {
   private segmentSize = 4;
 
   protected textOffset = 0;
+
+  private scrollLoopsRemaining = 0;
 
   constructor(size: { width: number, height: number }, border: number = 0) {
     super(size, border)
@@ -72,6 +75,14 @@ export class TextWidget extends Widget {
       const textWidth = this.font.stringWidth(this.text, this.fontKerning)
 
       if (this.textOffset < -textWidth) {
+        if (this.scrollLoopsRemaining > 0) {
+          this.scrollLoopsRemaining--
+          if (this.scrollLoopsRemaining === 0) {
+            log.verbose(`${this.constructor.name}: scroll complete`)
+            emitWidgetEvent('EndActive', this)
+            return
+          }
+        }
         this.textOffset = this.matrix.width()
       }
     }
@@ -79,6 +90,14 @@ export class TextWidget extends Widget {
     if (this.isActive) {
       this.draw(true)
     }
+  }
+
+  public scroll(numTimes: number): void {
+    log.verbose(`${this.constructor.name}: scroll(${numTimes})`)
+    this.scrollLoopsRemaining = numTimes
+    this.scrollSpeed = 1
+    this.textOffset = this.matrix?.width() ?? 64
+    emitWidgetEvent('RequestActive', this)
   }
 
   public override activate(): void {
