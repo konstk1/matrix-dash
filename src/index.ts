@@ -3,6 +3,7 @@ import 'dotenv/config'
 import { matrix } from './matrix'
 import { Page } from './widgets/page'
 import { createAircraftPage } from './pages/aircraft'
+import { createMedsPage } from './pages/meds'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
 
@@ -49,10 +50,18 @@ async function main() {
 
     matrix && matrix.brightness(20)
 
-    const aircraftPage = await createAircraftPage()
+    let page1: Page
 
-    let currentPage: Page = aircraftPage
-    aircraftPage.activate()
+    const showMeds = false
+    
+    if (showMeds) {
+      page1 = await createMedsPage(bt)
+    } else {
+      page1 = await createAircraftPage()
+    }
+
+    let currentPage: Page = page1
+    page1.activate()
 
     setInterval(() => autoDimmer(currentPage), 1000 * 1)
   } catch (error) {
