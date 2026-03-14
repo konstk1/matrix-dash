@@ -37,7 +37,7 @@ export function getDistanceColor(distMi: number) {
 export function getHeadingArrow(heading: number) {
   // house offset 45 degrees
   const index = Math.round((heading - 45 + 360) / 45) % 8
-  console.log(`Heading: ${heading.toFixed(0)} Index: ${index} Arrow: ${headingArrows[index]}`)
+  // console.log(`Heading: ${heading.toFixed(0)} Index: ${index} Arrow: ${headingArrows[index]}`)
   return headingArrows[index]
 }
 
@@ -49,7 +49,6 @@ export class AircraftWidget extends TextWidget {
   constructor(size: { width: number, height: number }, border = 0) {
     super(size, border)
     this.tracker.start()
-
     setInterval(this.updateAircraft.bind(this), 1000)
   }
 

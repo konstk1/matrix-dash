@@ -1,4 +1,4 @@
-import { onWidgetEvent, type WidgetEvent } from '../events'
+import { addWidgetEventListener, removeWidgetEventListener, type WidgetEvent } from '../events'
 import { Widget } from './widget'
 import log from '../log'
 
@@ -18,17 +18,11 @@ export class CarouselWidget extends Widget {
   // public override updateIntervalMs: number = 0;
 
   private widgetDisplayTimer?: NodeJS.Timeout
+  private requestActiveHandler = (sender: any) => this.processWidgetEvent('RequestActive', sender)
+  private endActiveHandler = (sender: any) => this.processWidgetEvent('EndActive', sender)
 
   constructor(size: { width: number, height: number }, border: number = 0) {
     super(size, border)
-
-    onWidgetEvent('RequestActive', (sender: any) => {
-      this.processWidgetEvent('RequestActive', sender)
-    })
-
-    onWidgetEvent('EndActive', (sender: any) => {
-      this.processWidgetEvent('EndActive', sender)
-    })
   }
 
   private processWidgetEvent(event: WidgetEvent, sender: any) {
@@ -48,16 +42,24 @@ export class CarouselWidget extends Widget {
       return
     }
 
+    if (!this.isActive) {
+      return
+    }
     this.activateNextWidget()
   }
 
   public override activate(): void {
-    // this.widgets.forEach(w => w.widget.activate())
+    super.activate()
+    addWidgetEventListener('RequestActive', this.requestActiveHandler)
+    addWidgetEventListener('EndActive', this.endActiveHandler)
     this.activateNextWidget()
   }
 
   public override deactivate(): void {
+    removeWidgetEventListener('RequestActive', this.requestActiveHandler)
+    removeWidgetEventListener('EndActive', this.endActiveHandler)
     this.widgets.forEach(w => w.widget.deactivate())
+    super.deactivate()
   }
 
   public addWidget(widget: Widget,
