@@ -23,7 +23,7 @@ export class TextWidget extends Widget {
 
   constructor(size: { width: number, height: number }, border: number = 0) {
     super(size, border)
-    this.font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/fonts/${this.fontName}.bdf`)
+    this.font = new Font(this.fontName, `${process.cwd()}/node_modules/rpi-led-matrix/vendor/fonts/${this.fontName}.bdf`)
   }
 
   public setText(text: string) {
