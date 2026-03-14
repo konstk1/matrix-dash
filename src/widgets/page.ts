@@ -1,7 +1,7 @@
-import { matrix } from './matrix'
-import { Widget, Coordinates } from './widgets/widget'
+import { matrix } from '../matrix'
+import { Widget, Coordinates } from './widget'
 // @ts-ignore
-import log from './log'
+import log from '../log'
 
 export class Page {
   public title: string

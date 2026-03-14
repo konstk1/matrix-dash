@@ -1,100 +1,16 @@
 
 import 'dotenv/config'
 import { matrix } from './matrix'
-import { Page } from './page'
-// @ts-ignore
-import { WeatherWidget } from './widgets/weather-widget'
-// @ts-ignore
-import { ClockWidget } from './widgets/clock-widget'
-// @ts-ignore
-import { RouterWidget } from './widgets/router-widget'
-// @ts-ignore
-import { TextWidget } from './widgets/text-widget'
-import log from './log'
-// @ts-ignore
+import { Page } from './widgets/page'
+import { createAircraftPage } from './pages/aircraft'
 import { BabyTracker } from './services/babytracker'
-// import { BufferWidget } from './src/widgets/buffer-widget';
-// @ts-ignore
-import { TimerWidget } from './widgets/timer-widget'
-// @ts-ignore
-import { CanvasWidget } from './widgets/canvas-widget'
-import { ChatGPT } from './services/chatgpt'
-// @ts-ignore
-import { AircraftWidget } from './widgets/aircraft-widget'
-// @ts-ignore
-import { CarouselWidget } from './widgets/carousel-widget'
+import log from './log'
 
 const BH1750 = require('bh1750-sensor')
 
-const options = {
-  readMode: BH1750.ONETIME_H_RESOLUTION_MODE
-}
-
+const options = { readMode: BH1750.ONETIME_H_RESOLUTION_MODE }
 const bh1750 = new BH1750(options)
-
 const bt = new BabyTracker()
-const chatgpt = new ChatGPT()
-
-// @ts-ignore
-async function getLastMeds(name: string) {
-  try {
-    await bt.sync()
-  } catch (error) {
-    let errorMessage = ""
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    log.error('BT sync error:', errorMessage)
-    return 'BT error'
-  }
-
-  const meds = bt.getLastMeds(name)
-  if (!meds) {
-    return 'No meds'
-  }
-
-  const now = new Date()
-  const timeDiffIbuprofen = now.getTime() - meds.ibuprofen.getTime()
-  const timeDiffAcetaminophen = now.getTime() - meds.acetaminophen.getTime()
-
-  // split into hours
-  const diffHoursIbuprofen = timeDiffIbuprofen / (1000 * 3600)
-  const diffHoursAcetaminophen = timeDiffAcetaminophen / (1000 * 3600)
-
-  // convert to days if larger than 48 hours
-  const ibuprofenStr = diffHoursIbuprofen <= 48 ?
-    `${diffHoursIbuprofen.toFixed(1)}` :
-    (diffHoursIbuprofen > 720) ? '∞' : `${(diffHoursIbuprofen / 24).toFixed(1)}d`
-
-  const acetaminophenStr = diffHoursAcetaminophen <= 48 ?
-    `${diffHoursAcetaminophen.toFixed(1)}` :
-    (diffHoursAcetaminophen > 720) ? '∞' : `${(diffHoursAcetaminophen / 24).toFixed(1)}d`
-
-  return `I ${ibuprofenStr}  T ${acetaminophenStr}`
-}
-
-// @ts-ignore
-async function chatGptMessage() {
-  const answer = await chatgpt.generateChat('Write a very short snarky compliment for Steph')
-  return answer || "ChatGPT Error"
-}
-
-// @ts-ignore
-async function lightLevelMessage() {
-  let data = bh1750.readData()
-  return ` L: ${data.toFixed(0)} B: ${matrix.brightness()}`
-}
-
-// bottom scroller settings
-// @ts-ignore
-const SCROLLER_SCROLL_SPEED = 0
-// @ts-ignore
-const SCROLLER_UPDATE_INTERVAL_SEC = 5 * 60
-
-// @ts-ignore
-async function getScrollerMessage(param: string) {
-  return getLastMeds(param)
-}
 
 function autoDimmer(page: Page) {
   if (!matrix) {
@@ -121,8 +37,8 @@ function autoDimmer(page: Page) {
   // console.log('Light level:', level.toFixed(2));
 }
 
-process.on("SIGINT", function () {
-  log.warn("SIGINT, exiting...")
+process.on('SIGINT', () => {
+  log.warn('SIGINT, exiting...')
   process.exit(0)
 })
 
@@ -133,65 +49,15 @@ async function main() {
 
     matrix && matrix.brightness(20)
 
-    const page1 = new Page('page1')
+    const aircraftPage = await createAircraftPage()
 
-    const clock = new ClockWidget({ width: 32, height: 16 }, 0)
-    page1.addWidget(clock, { x: 0, y: 0 })
+    let currentPage: Page = aircraftPage
+    aircraftPage.activate()
 
-    const weather = new WeatherWidget({ width: 32, height: 16 }, 0)
-    page1.addWidget(weather, { x: 32, y: 0 })
-
-    // const scrollerTop = new TextWidget({ width: 64, height: 16 }, 0)
-    // scrollerTop.setText(await getScrollerMessage('Maya'))
-    // scrollerTop.scrollSpeed = SCROLLER_SCROLL_SPEED
-    // scrollerTop.fgColor = 0xfa0a92 // ping
-    // page1.addWidget(scrollerTop, { x: 0, y: 0 })
-
-
-    const showMeds = false
-
-    if (showMeds) {
-      const scrollerBottom = new TextWidget({ width: 64, height: 16 }, 0)
-      scrollerBottom.setText(await getScrollerMessage('any'))
-      scrollerBottom.scrollSpeed = SCROLLER_SCROLL_SPEED
-      scrollerBottom.fgColor = 0xeb9b34 // orange
-      page1.addWidget(scrollerBottom, { x: 0, y: 16 })
-
-      setInterval(async () => {
-        // scrollerTop.setText(await getScrollerMessage('Maya'))
-        scrollerBottom.setText(await getScrollerMessage('any'))
-      }, 1000 * SCROLLER_UPDATE_INTERVAL_SEC)
-    } else {
-      const aircraft = new AircraftWidget({ width: 64, height: 16 }, 0)
-      const canvas = new CanvasWidget({ width: 64, height: 16 }, 0)
-      const scroller = new TextWidget({ width: 64, height: 16 }, 0)
-      scroller.setText('6 7')
-      scroller.fgColor = 0x00FF00
-
-      const carousel = new CarouselWidget({ width: 64, height: 16 })
-      carousel.addWidget(canvas, { displayTimeSec: 0, defaultPriority: 10, activePriority: 10 })
-      carousel.addWidget(aircraft, { displayTimeSec: 0, defaultPriority: 0, activePriority: 50 })
-      carousel.addWidget(scroller, { displayTimeSec: 0, defaultPriority: 0, activePriority: 100 })
-      page1.addWidget(carousel, { x: 0, y: 16 })
-
-      // random scroller
-      const scheduleScroller = () => {
-        const delayMs = (5 + Math.random() * 1) * 60 * 1000
-        log.verbose(`Next scroller in ${(delayMs / 60000).toFixed(1)} min`)
-        setTimeout(() => {
-          scroller.scroll(2)
-          scheduleScroller()
-        }, delayMs)
-      }
-      scheduleScroller()
-    }
-
-    page1.activate()
-
-    setInterval(autoDimmer, 1000 * 1, page1)
+    setInterval(() => autoDimmer(currentPage), 1000 * 1)
   } catch (error) {
     console.error(error)
   }
-};
+}
 
 main()
