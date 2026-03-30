@@ -1,5 +1,5 @@
 import { matrix } from '../matrix'
-import { Widget, Coordinates } from './widget'
+import { Widget, Coordinates } from '../widgets/widget'
 // @ts-ignore
 import log from '../log'
 

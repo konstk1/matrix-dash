@@ -1,4 +1,4 @@
-import { Page } from '../widgets/page'
+import { Page } from './page'
 import { CountdownWidget } from '../widgets/countdown-widget'
 
 const COLS = 64

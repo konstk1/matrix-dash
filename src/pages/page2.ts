@@ -1,4 +1,4 @@
-import { Page } from '../widgets/page'
+import { Page } from './page'
 import { TextWidget } from '../widgets/text-widget'
 
 const COLS = 64

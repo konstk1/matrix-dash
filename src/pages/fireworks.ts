@@ -1,4 +1,4 @@
-import { Page } from '../widgets/page'
+import { Page } from './page'
 import { FireworksWidget } from '../widgets/fireworks-widget'
 
 const COLS = 64

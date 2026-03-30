@@ -1,11 +1,12 @@
 
 import 'dotenv/config'
 import { matrix } from './matrix'
-import { Page } from './widgets/page'
+import { Page } from './pages/page'
 import { createAircraftPage } from './pages/aircraft'
 import { createMedsPage } from './pages/meds'
 import { createCountdownPage } from './pages/countdown'
 import { createFireworksPage } from './pages/fireworks'
+import { PageCarousel } from './page-carousel'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
 
@@ -84,23 +85,16 @@ async function main() {
     }
 
     const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:30:00-04:00'))
+    const fireworksPage = createFireworksPage()
 
-    let currentPage: Page = page1
-    page1.activate()
+    const carousel = new PageCarousel([
+      { page: page1, durationSec: 30 },
+      { page: countdownPage, durationSec: 15 },
+      { page: fireworksPage, durationSec: 8 },
+    ])
+    carousel.start()
 
-    setInterval(() => {
-      page1.deactivate()
-      currentPage = countdownPage
-      countdownPage.activate()
-
-      setTimeout(() => {
-        countdownPage.deactivate()
-        currentPage = page1
-        page1.activate()
-      }, 15 * 1000)
-    }, 30 * 1000)
-
-    setInterval(() => autoDimmer(currentPage), 1000 * 5)
+    setInterval(() => autoDimmer(carousel.currentPage()), 1000 * 5)
   } catch (error) {
     console.error(error)
   }
