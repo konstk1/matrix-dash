@@ -75,8 +75,8 @@ async function main() {
         countdownPage.deactivate()
         currentPage = page1
         page1.activate()
-      }, 10 * 1000)
-    }, 60 * 1000)
+      }, 15 * 1000)
+    }, 30 * 1000)
 
     setInterval(() => autoDimmer(currentPage), 1000 * 5)
   } catch (error) {
