@@ -59,6 +59,7 @@ export class CarouselWidget extends Widget {
     removeWidgetEventListener('RequestActive', this.requestActiveHandler)
     removeWidgetEventListener('EndActive', this.endActiveHandler)
     this.widgets.forEach(w => w.widget.deactivate())
+    this.currentWidget = undefined
     super.deactivate()
   }
 

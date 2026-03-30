@@ -4,6 +4,7 @@ import { matrix } from './matrix'
 import { Page } from './widgets/page'
 import { createAircraftPage } from './pages/aircraft'
 import { createMedsPage } from './pages/meds'
+import { createCountdownPage } from './pages/countdown'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
 
@@ -60,10 +61,24 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
+    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:30:00-04:00'))
+
     let currentPage: Page = page1
     page1.activate()
 
-    setInterval(() => autoDimmer(currentPage), 1000 * 1)
+    setInterval(() => {
+      page1.deactivate()
+      currentPage = countdownPage
+      countdownPage.activate()
+
+      setTimeout(() => {
+        countdownPage.deactivate()
+        currentPage = page1
+        page1.activate()
+      }, 10 * 1000)
+    }, 60 * 1000)
+
+    setInterval(() => autoDimmer(currentPage), 1000 * 5)
   } catch (error) {
     console.error(error)
   }
