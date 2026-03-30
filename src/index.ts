@@ -5,6 +5,7 @@ import { Page } from './widgets/page'
 import { createAircraftPage } from './pages/aircraft'
 import { createMedsPage } from './pages/meds'
 import { createCountdownPage } from './pages/countdown'
+import { createFireworksPage } from './pages/fireworks'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
 
@@ -54,7 +55,28 @@ async function main() {
     let page1: Page
 
     const showMeds = false
-    
+    const testPage: string | false = false; // 'fireworks' // set to page name or false to run normally
+
+    if (testPage) {
+      let page: Page
+      switch (testPage) {
+        case 'meds':
+          page = await createMedsPage(bt)
+          break
+        case 'fireworks':
+          page = createFireworksPage()
+          break
+        case 'countdown':
+          page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:30:00-04:00'))
+          break
+        default:
+          page = await createAircraftPage()
+      }
+      page.activate()
+      setInterval(() => autoDimmer(page), 1000 * 5)
+      return
+    }
+
     if (showMeds) {
       page1 = await createMedsPage(bt)
     } else {
