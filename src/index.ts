@@ -89,8 +89,8 @@ async function main() {
 
     const carousel = new PageCarousel([
       { page: page1, durationSec: 30 },
-      { page: countdownPage, durationSec: 15 },
-      { page: fireworksPage, durationSec: 8 },
+      { page: countdownPage, durationSec: 10 },
+      { page: fireworksPage, durationSec: 6 },
     ])
     carousel.start()
 
