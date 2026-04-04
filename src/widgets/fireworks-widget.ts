@@ -1,4 +1,6 @@
 import { Widget, Size } from './widget'
+import { Font } from '../matrix'
+import { FontInstance } from 'rpi-led-matrix'
 
 type Rgb = { r: number, g: number, b: number }
 
@@ -33,8 +35,20 @@ export class FireworksWidget extends Widget {
   private fireworks: Firework[] = []
   private now = 0
 
+  private overlayLines: string[] = []
+  private overlayColor: number = 0xFFFFFF
+  private font: FontInstance
+  private fontKerning = -1
+
   constructor(size: Size, border: number = 0) {
     super(size, border)
+    const fontName = '6x10'
+    this.font = new Font(fontName, `${process.cwd()}/node_modules/rpi-led-matrix/vendor/fonts/${fontName}.bdf`)
+  }
+
+  public setOverlayText(lines: string[], color: number = 0xFFFFFF): void {
+    this.overlayLines = lines
+    this.overlayColor = color
   }
 
   public override activate(): void {
@@ -162,6 +176,20 @@ export class FireworksWidget extends Widget {
               .setPixel(this.origin.x + px, this.origin.y + py)
           }
         }
+      }
+    }
+
+    if (this.overlayLines.length > 0) {
+      const lineHeight = 10
+      const totalHeight = this.overlayLines.length * lineHeight
+      const startY = this.origin.y + Math.floor((this.size.height - totalHeight) / 2)
+      this.matrix
+        .font(this.font)
+        .fgColor(this.overlayColor)
+      for (let i = 0; i < this.overlayLines.length; i++) {
+        const textWidth = this.font.stringWidth(this.overlayLines[i], this.fontKerning)
+        const x = this.origin.x + Math.floor((this.size.width - textWidth) / 2)
+        this.matrix.drawText(this.overlayLines[i], x, startY + i * lineHeight, this.fontKerning)
       }
     }
 
