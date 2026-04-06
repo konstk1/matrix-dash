@@ -84,7 +84,7 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
-    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:30:00-04:00'))
+    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:00:00-04:00'))
     const fireworksPage = createFireworksPage()
 
     const carousel = new PageCarousel([

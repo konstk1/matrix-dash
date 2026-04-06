@@ -10,6 +10,7 @@ export class CountdownWidget extends Widget {
   private label: string
   private targetDate: Date
   private font: FontInstance
+  private flashVisible = true
 
   constructor(size: { width: number, height: number }, label: string, targetDate: Date) {
     super(size, 0)
@@ -44,9 +45,15 @@ export class CountdownWidget extends Widget {
       .fgColor(0xFF88AA)
       .drawText(this.label, this.origin.x, this.origin.y + 2, -1)
 
-    for (let i = 0; i < parts.length; i++) {
-      this.matrix.fgColor(colors[i]).drawText(parts[i], x, y, -1)
-      x += this.font.stringWidth(parts[i], -1)
+    if (totalSec === 0) {
+      this.flashVisible = !this.flashVisible
+    }
+
+    if (totalSec > 0 || this.flashVisible) {
+      for (let i = 0; i < parts.length; i++) {
+        this.matrix.fgColor(colors[i]).drawText(parts[i], x, y, -1)
+        x += this.font.stringWidth(parts[i], -1)
+      }
     }
 
     if (sync) {
