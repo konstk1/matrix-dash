@@ -5,7 +5,7 @@ import { FontInstance } from 'rpi-led-matrix'
 export class CountdownWidget extends Widget {
   public override fgColor = 0xFFFFFF;
 
-  protected override updateIntervalMs = 1000;
+  protected override updateIntervalMs = 500 // 1Hz flash rate
 
   private label: string
   private targetDate: Date

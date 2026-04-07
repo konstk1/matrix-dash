@@ -53,10 +53,11 @@ async function main() {
 
     matrix && matrix.brightness(20)
 
+    // @ts-ignore
     let page1: Page
 
     const showMeds = false
-    const testPage: string | false = false; // 'fireworks' // set to page name or false to run normally
+    const testPage: string | false = false // 'countdown'; // set to page name or false to run normally
 
     if (testPage) {
       let page: Page
@@ -68,7 +69,7 @@ async function main() {
           page = createFireworksPage()
           break
         case 'countdown':
-          page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:30:00-04:00'))
+          page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-06T07:00:00-04:00'))
           break
         default:
           page = await createAircraftPage()
@@ -84,7 +85,7 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
-    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T07:00:00-04:00'))
+    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T06:00:00-04:00'))
     const fireworksPage = createFireworksPage()
 
     const carousel = new PageCarousel([
