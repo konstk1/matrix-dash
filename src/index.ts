@@ -51,7 +51,7 @@ async function main() {
   try {
     log.verbose('Matrix dash starting...')
 
-    matrix && matrix.brightness(20)
+    matrix && matrix.brightness(50)
 
     // @ts-ignore
     let page1: Page
@@ -85,17 +85,17 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
-    const countdownPage = createCountdownPage('Maya\'s B-Day', new Date('2026-04-07T06:00:00-04:00'))
+    const countdownPage = createCountdownPage('Maya\'s Party', new Date('2026-04-12T13:00:00-04:00'))
     const fireworksPage = createFireworksPage()
 
     const carousel = new PageCarousel([
       { page: page1, durationSec: 30 },
       { page: countdownPage, durationSec: 10 },
-      { page: fireworksPage, durationSec: 6 },
+      { page: fireworksPage, durationSec: 7 },
     ])
     carousel.start()
 
-    setInterval(() => autoDimmer(carousel.currentPage()), 1000 * 5)
+    setInterval(() => autoDimmer(carousel.currentPage()), 1000 * 2)
   } catch (error) {
     console.error(error)
   }
