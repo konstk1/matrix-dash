@@ -13,6 +13,9 @@ RGBA = Tuple[int, int, int, int]
 
 DEFAULT_LETTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@$%&*+=?"
 
+# Opaque RGB 0,0,0 is emitted as "." and never listed in palette (SpriteDef convention).
+DOT_LETTER = "."
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -31,8 +34,9 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--transparent-letter",
-        default=".",
-        help="Letter to use for transparent pixels (default: .)",
+        default=" ",
+        metavar="CHAR",
+        help="Char for transparent pixels (default: space). '.' is reserved for implicit black.",
     )
     parser.add_argument(
         "--remove-edge-bg",
@@ -192,6 +196,10 @@ def merge_similar_colors(img: Image.Image, threshold: int, alpha_threshold: int)
     return img
 
 
+def is_opaque_black(c: RGBA, alpha_threshold: int) -> bool:
+    return c[3] >= alpha_threshold and c[0] == c[1] == c[2] == 0
+
+
 def sorted_palette(img: Image.Image, alpha_threshold: int) -> List[RGBA]:
     px = img.load()
     counts = Counter(
@@ -200,7 +208,11 @@ def sorted_palette(img: Image.Image, alpha_threshold: int) -> List[RGBA]:
         for x in range(img.width)
         if px[x, y][3] >= alpha_threshold
     )
-    return [c for c, _ in counts.most_common()]
+    return [
+        c
+        for c, _ in counts.most_common()
+        if not is_opaque_black(c, alpha_threshold)
+    ]
 
 
 def assign_letters(
@@ -208,7 +220,11 @@ def assign_letters(
     transparent_letter: str,
     letters: str,
 ) -> Dict[RGBA, str]:
-    usable = [ch for ch in letters if ch != transparent_letter]
+    usable = [
+        ch
+        for ch in letters
+        if ch != transparent_letter and ch != DOT_LETTER
+    ]
     if len(palette) > len(usable):
         raise ValueError(
             f"Not enough letters for palette: need {len(palette)}, have {len(usable)}"
@@ -230,6 +246,8 @@ def image_to_rows(
             c = px[x, y]
             if c[3] < alpha_threshold:
                 chars.append(transparent_letter)
+            elif is_opaque_black(c, alpha_threshold):
+                chars.append(DOT_LETTER)
             else:
                 chars.append(mapping[c])
         rows.append("".join(chars))
@@ -238,6 +256,14 @@ def image_to_rows(
 
 def hex_rgb(c: RGBA) -> str:
     return f"#{c[0]:02x}{c[1]:02x}{c[2]:02x}"
+
+
+def palette_key_ts(ch: str) -> str:
+    if len(ch) != 1:
+        raise ValueError("palette key must be one character")
+    if ch.isalnum() or ch in "@$%&*+=?":
+        return ch
+    return repr(ch)
 
 
 def format_sprite(
@@ -250,7 +276,7 @@ def format_sprite(
     lines: List[str] = []
     lines.append(f"const {name}: SpriteDef = {{")
     lines.append("  palette: {")
-    lines.append(f"    {transparent_letter!s}: T,")
+    lines.append(f"    {palette_key_ts(transparent_letter)}: T,")
     for color in palette:
         lines.append(f"    {mapping[color]}: '{hex_rgb(color)}',")
     lines.append("  },")
@@ -264,6 +290,11 @@ def format_sprite(
 
 def main() -> None:
     args = parse_args()
+    if len(args.transparent_letter) != 1:
+        raise SystemExit("--transparent-letter must be exactly one character")
+    if args.transparent_letter == DOT_LETTER:
+        raise SystemExit("--transparent-letter cannot be '.' (reserved for implicit black)")
+
     img = Image.open(args.input).convert("RGBA")
     img = resize_image(img, args.width, args.height)
 
