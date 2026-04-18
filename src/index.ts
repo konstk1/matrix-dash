@@ -58,7 +58,7 @@ async function main() {
     let page1: Page
 
     const showMeds = false
-    const testPage: string | false = false // 'pokemon' // set to page name or false to run normally
+    const testPage: string | false = false //'pokemon' // set to page name or false to run normally
 
     if (testPage) {
       let page: Page
@@ -73,7 +73,7 @@ async function main() {
           page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-06T07:00:00-04:00'))
           break
         case 'pokemon':
-          page = createPokemonPage('random')
+          page = createPokemonPage('eevee2')
           break
         default:
           page = await createAircraftPage()

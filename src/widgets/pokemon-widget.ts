@@ -1,32 +1,31 @@
 import { Widget, Size } from './widget'
 
-const K = 0x000000 // black outline + pupils
-const W = 0xFFFFFF // eye white
-const T = -1       // transparent
-
-// pikachu palette
-const Y = 0xFFD300 // yellow body
-const R = 0xFF3030 // red cheeks
-
-// squirtle palette
-const B = 0x66B2E0 // blue body
-const S = 0x8B4513 // shell rim brown
-const C = 0xFFE088 // cream belly
-
 type Box = { x0: number, x1: number }
 
+type EyeConfig = {
+  rowMid: number        // row drawn as a full black line when blinking
+  rowsAll: number[]     // all rows that contain eye pixels
+  outer: Box[]          // full eye box per eye, inclusive
+  closedColor: string   // hex color painted on non-mid rows when blinking
+}
+
 type SpriteDef = {
-  palette: Record<string, number>
+  palette: Record<string, string>  // char -> '#RRGGBB'; '.' is implicit transparent
   rows: string[]
-  eyeRowMid: number         // row drawn as a full black line when blinking
-  eyeRowsAll: number[]      // all rows that contain eye pixels
-  eyesOuter: Box[]          // full eye box (edges + interior) per eye, inclusive
-  eyesInner: Box[]          // interior only (where pupil/white lives) per eye, inclusive
-  closedInterior: number    // color to paint eye interior when blinking (body color)
+  eyes?: EyeConfig      // omit to disable blinking entirely
+}
+
+const BLACK = 0x000000
+const TRANSPARENT = -1
+
+function parseHex(s: string): number {
+  const m = /^#([0-9a-fA-F]{6})$/.exec(s)
+  if (!m) { throw new Error(`invalid hex color '${s}'`) }
+  return parseInt(m[1], 16)
 }
 
 const PIKACHU: SpriteDef = {
-  palette: { '.': T, k: K, y: Y, r: R, w: W },
+  palette: { k: '#000000', y: '#FFD300', r: '#FF3030', w: '#FFFFFF' },
   rows: [
     '................................',
     '.........kk..........kk.........',
@@ -61,15 +60,16 @@ const PIKACHU: SpriteDef = {
     '................................',
     '................................',
   ],
-  eyeRowMid: 14,
-  eyeRowsAll: [13, 14, 15],
-  eyesOuter: [{ x0: 7, x1: 10 }, { x0: 21, x1: 24 }],
-  eyesInner: [{ x0: 8, x1: 9 }, { x0: 22, x1: 23 }],
-  closedInterior: Y,
+  eyes: {
+    rowMid: 14,
+    rowsAll: [13, 14, 15],
+    outer: [{ x0: 7, x1: 10 }, { x0: 21, x1: 24 }],
+    closedColor: '#FFD300',
+  },
 }
 
 const SQUIRTLE: SpriteDef = {
-  palette: { '.': T, k: K, b: B, w: W, s: S, c: C },
+  palette: { k: '#000000', b: '#66B2E0', w: '#FFFFFF', s: '#8B4513', c: '#FFE088' },
   rows: [
     '................................',
     '................................',
@@ -104,23 +104,160 @@ const SQUIRTLE: SpriteDef = {
     '................................',
     '................................',
   ],
-  eyeRowMid: 9,
-  eyeRowsAll: [7, 8, 9, 10],
-  eyesOuter: [{ x0: 9, x1: 12 }, { x0: 15, x1: 18 }],
-  eyesInner: [{ x0: 10, x1: 11 }, { x0: 16, x1: 17 }],
-  closedInterior: B,
+  eyes: {
+    rowMid: 9,
+    rowsAll: [7, 8, 9, 10],
+    outer: [{ x0: 9, x1: 12 }, { x0: 15, x1: 18 }],
+    closedColor: '#66B2E0',
+  },
+}
+
+const POKEBALL: SpriteDef = {
+  palette: { k: '#000000', r: '#EE1515', w: '#FFFFFF' },
+  rows: [
+    '................................',
+    '................................',
+    '............kkkkkkkk............',
+    '.........krrrrrrrrrrrk..........',
+    '........krrrrrrrrrrrrrrk........',
+    '.......krrrrrrrrrrrrrrrrk.......',
+    '......krrrrrrrrrrrrrrrrrrk......',
+    '.....krrrrrrrrrrrrrrrrrrrrk.....',
+    '....krrrrrrrrrrrrrrrrrrrrrrk....',
+    '....krrrrrrrrrrrrrrrrrrrrrrk....',
+    '...krrrrrrrrrrrrrrrrrrrrrrrrk...',
+    '...krrrrrrrrrrrrrrrrrrrrrrrrk...',
+    '..krrrrrrrrrrrrrrrrrrrrrrrrrrk..',
+    '..krrrrrrrrrrrkkkkrrrrrrrrrrrk..',
+    '..kkkkkkkkkkkkwwwwkkkkkkkkkkkk..',
+    '..kkkkkkkkkkkkwwwwkkkkkkkkkkkk..',
+    '..kkkkkkkkkkkkwwwwkkkkkkkkkkkk..',
+    '..kwwwwwwwwwwwkkkkwwwwwwwwwwwk..',
+    '..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..',
+    '..kwwwwwwwwwwwwwwwwwwwwwwwwwwk..',
+    '...kwwwwwwwwwwwwwwwwwwwwwwwwk...',
+    '...kwwwwwwwwwwwwwwwwwwwwwwwwk...',
+    '....kwwwwwwwwwwwwwwwwwwwwwwk....',
+    '....kwwwwwwwwwwwwwwwwwwwwwwk....',
+    '.....kwwwwwwwwwwwwwwwwwwwwk.....',
+    '......kwwwwwwwwwwwwwwwwwwk......',
+    '.......kwwwwwwwwwwwwwwwwk.......',
+    '........kwwwwwwwwwwwwwwk........',
+    '.........kwwwwwwwwwwwk..........',
+    '............kkkkkkkk............',
+    '................................',
+    '................................',
+  ],
+}
+
+const EEVEE: SpriteDef = {
+  palette: {
+    k: '#000000', w: '#FFFFFF',
+    E: '#C88A50', D: '#5A3018', M: '#F0D4A0',
+  },
+  rows: [
+    '................................',
+    '................................',
+    '.......kk............kk.........',
+    '.......kDk..........kDk.........',
+    '......kDDk..........kDDk........',
+    '......kDDDk........kDDDk........',
+    '......kDDDk........kDDDk........',
+    '......kDDDkkkkkkkkkDDDk.........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kEEkkEEEEEEEEkkEEk........',
+    '......kEkwwkEEEEEEkwwkEk........',
+    '......kEEkkEEEEEEEEkkEEk........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kEEEEEEEkkkEEEEEEk........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '.......kEEEEEEEEEEEEEEk.........',
+    '.......kMMMMMMMMMMMMMMk.........',
+    '......kMMMMMMMMMMMMMMMMk........',
+    '.....kMMMMMMMMMMMMMMMMMMk.......',
+    '.....kMMMMMMMMMMMMMMMMMMk.......',
+    '.....kkMMMMMMMMMMMMMMMMkk.......',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kEEEEEEEEEEEEEEEEk........',
+    '......kkEEEEEEEEEEEEEEkk........',
+    '........kkkk....kkkk............',
+    '........kEEk....kEEk............',
+    '........kkkk....kkkk............',
+    '................................',
+    '................................',
+    '................................',
+  ],
+  eyes: {
+    rowMid: 12,
+    rowsAll: [11, 12, 13],
+    outer: [{ x0: 8, x1: 11 }, { x0: 18, x1: 21 }],
+    closedColor: '#C88A50',
+  },
+}
+
+const EEVEE2: SpriteDef = {
+  palette: {
+    a: '#f9f9f9', b: '#282828', c: '#f0d9bc', d: '#8c603e',
+    e: '#f1d9bc', f: '#ba8d57', g: '#572f20', h: '#ddb68a',
+  },
+  rows: [
+    'cccccccagdgbbgdbaccccccaaddffffb',
+    'eeecheeagdgbbddbaeeeeaaadffdbbdb',
+    'cccgheeagdgbbdbaaeceaagdfdbbbdba',
+    'chgbhecagdgbddbaeceaagffbbggbdba',
+    'cghgaeeagdbbdbaaccaagffbbggbdbaa',
+    'cccccccaagbfgbgaaaagdfbbgggbdbac',
+    'ceegecaagdgffgfbbagffbbggggdbaac',
+    'cegheaagfdfdfdffdbgfbbbgggdbaacc',
+    'cceeeagfffffffdffgfdfbbbddbaacaa',
+    'ceecaagfffffffffffffggddbbaaaaag',
+    'ccccadfffffffffffffgddgbaaaaaghc',
+    'ceecadgffffffffffffdggaaacaaghec',
+    'ceecagagfffffffffffddbaccaaghcec',
+    'ceeeabbbffffffdgffffdbacaagfceec',
+    'ceeaabgbffffffgabfffdbacagfhceec',
+    'cccadfbdffffffbbbffddbaaagfhhfhc',
+    'cccagfffgfffffbgbffddbaagddhfdfh',
+    'cceagfffffffffgbdfddghbagddfddfd',
+    'cccaadfdgfffgfffffddghhgdddddddd',
+    'ceeaagfffdggfffffddghhhhbddddddd',
+    'ceaafcbdfffffffddddghhhhbddddddd',
+    'caafchfgbdfffddddgghhhfhhgdddddd',
+    'eafehccffegggggggfhhhhhfbgdddddd',
+    'cafchefeeeeehhhhhhfhhhhhbggddddd',
+    'cafhcheceeceechfhhhfhhfbgggggddd',
+    'caaghfceeeeeeeehfhhfhhfbbggggggg',
+    'ccaghfeceeceecehfhhfhhbdbggggggg',
+    'ccaaggeceeceechhfhfhhbdddbgggggg',
+    'cccaaagheeeehhhfhhfbgddddbgggggd',
+    'cccccagfhhhhfhhbgfbdddddddbggeeh',
+    'cccceaaghfhhfhbgdbddgdddddbggegf',
+    'ccccccaagbhfhbggddddgdddddbbbfaa',
+  ],
 }
 
 const DEFS = {
   pikachu: PIKACHU,
   squirtle: SQUIRTLE,
+  pokeball: POKEBALL,
+  eevee: EEVEE,
+  eevee2: EEVEE2,
 } as const
 
 export type PokemonName = keyof typeof DEFS
 
+type CompiledEyes = {
+  rowMid: number
+  rowsAll: number[]
+  outer: Box[]
+  closedColor: number
+}
+
 type CompiledSprite = {
-  def: SpriteDef
   pixels: number[][]
+  eyes?: CompiledEyes
 }
 
 function compile(name: string, def: SpriteDef): CompiledSprite {
@@ -129,19 +266,29 @@ function compile(name: string, def: SpriteDef): CompiledSprite {
       throw new Error(`${name} sprite row ${i} has length ${row.length}, expected 32`)
     }
     return row.split('').map(c => {
+      if (c === '.') { return TRANSPARENT }
       const v = def.palette[c]
       if (v === undefined) {
         throw new Error(`${name} sprite row ${i} has unknown char '${c}'`)
       }
-      return v
+      return parseHex(v)
     })
   })
-  return { def, pixels }
+  const eyes = def.eyes ? {
+    rowMid: def.eyes.rowMid,
+    rowsAll: def.eyes.rowsAll,
+    outer: def.eyes.outer,
+    closedColor: parseHex(def.eyes.closedColor),
+  } : undefined
+  return { pixels, eyes }
 }
 
 const SPRITES: Record<PokemonName, CompiledSprite> = {
   pikachu: compile('pikachu', PIKACHU),
   squirtle: compile('squirtle', SQUIRTLE),
+  pokeball: compile('pokeball', POKEBALL),
+  eevee: compile('eevee', EEVEE),
+  eevee2: compile('eevee2', EEVEE2),
 }
 
 export const POKEMON_NAMES: PokemonName[] = Object.keys(SPRITES) as PokemonName[]
@@ -154,12 +301,10 @@ function inBox(x: number, boxes: Box[]): boolean {
   return boxes.some(b => x >= b.x0 && x <= b.x1)
 }
 
-function closedEyePixel(def: SpriteDef, x: number, y: number): number | null {
-  if (!def.eyeRowsAll.includes(y)) { return null }
-  if (y === def.eyeRowMid) {
-    return inBox(x, def.eyesOuter) ? K : null
-  }
-  return inBox(x, def.eyesInner) ? def.closedInterior : null
+function closedEyePixel(eyes: CompiledEyes | undefined, x: number, y: number): number | null {
+  if (!eyes || !eyes.rowsAll.includes(y)) { return null }
+  if (!inBox(x, eyes.outer)) { return null }
+  return y === eyes.rowMid ? BLACK : eyes.closedColor
 }
 
 export type PokemonSelection = PokemonName | 'random'
@@ -188,7 +333,9 @@ export class PokemonWidget extends Widget {
     }
     this.blinking = false
     this.pendingDoubleBlink = false
-    this.scheduleNextBlink(500)
+    if (this.hasBlink()) {
+      this.scheduleNextBlink(500)
+    }
     super.activate()
     // Page.activate() draws before activating widgets, so a freshly-picked
     // random pokemon wouldn't appear until the first blink. Force a redraw.
@@ -197,11 +344,17 @@ export class PokemonWidget extends Widget {
     }
   }
 
+  private hasBlink(): boolean {
+    return SPRITES[this.current].eyes !== undefined
+  }
+
   private scheduleNextBlink(minMs: number = 1200): void {
     this.nextBlinkAt = Date.now() + minMs + Math.random() * 2500
   }
 
   protected override update(): void {
+    if (!this.hasBlink()) { return }
+
     const now = Date.now()
     let changed = false
 
@@ -241,7 +394,7 @@ export class PokemonWidget extends Widget {
       for (let x = 0; x < spriteW; x++) {
         let color = pixels[y][x]
         if (this.blinking) {
-          const override = closedEyePixel(sprite.def, x, y)
+          const override = closedEyePixel(sprite.eyes, x, y)
           if (override !== null) { color = override }
         }
         if (color < 0) { continue }

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>sprite_conv visualizer</title>
+  <style>
+    :root {
+      --bg: #121218;
+      --panel: #1c1c26;
+      --text: #e8e8ef;
+      --muted: #8888a0;
+      --accent: #6c9cff;
+      --err: #ff4466;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.45;
+    }
+    h1 { font-size: 1.1rem; font-weight: 600; margin: 0 0 0.75rem; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 1.25rem 1rem 2rem; }
+    .main-split {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .editor-col {
+      flex: 1;
+      min-width: 0;
+    }
+    .preview-col {
+      flex: 0 0 auto;
+      position: sticky;
+      top: 0.75rem;
+      align-self: flex-start;
+      max-height: calc(100vh - 1.5rem);
+      overflow: auto;
+    }
+    @media (max-width: 800px) {
+      .main-split { flex-direction: column; }
+      .preview-col {
+        position: static;
+        max-height: none;
+        align-self: stretch;
+      }
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+    }
+    label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; }
+    textarea {
+      width: 100%;
+      min-height: min(420px, calc(100vh - 220px));
+      padding: 0.65rem 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 12px;
+      background: #0e0e14;
+      border: 1px solid #2a2a38;
+      border-radius: 6px;
+      color: var(--text);
+      resize: vertical;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin: 0.75rem 0; }
+    input[type="file"] { font-size: 0.85rem; color: var(--muted); }
+    input[type="range"] { width: 160px; }
+    button {
+      background: var(--accent);
+      color: #0a1020;
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button:hover { filter: brightness(1.08); }
+    .meta { font-size: 0.85rem; color: var(--muted); }
+    .meta.err { color: var(--err); }
+    #canvasWrap {
+      display: block;
+      padding: 12px;
+      background: repeating-conic-gradient(#2a2a34 0% 25%, #1e1e28 0% 50%) 50% / 16px 16px;
+      border-radius: 8px;
+      border: 1px solid #2a2a38;
+    }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+    .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>sprite_conv output — preview</h1>
+    <p class="hint">Paste TypeScript from <code>sprite_conv.py</code> or load a <code>.ts</code> / text file. Renders the <code>palette</code> + <code>rows</code> block (same shape as <code>SpriteDef</code>).</p>
+
+    <div class="main-split">
+      <div class="editor-col panel">
+        <label for="src">Sprite source</label>
+        <textarea id="src" spellcheck="false" placeholder="const EEVEE: SpriteDef = {
+  palette: {
+    .: T,
+    a: '#f1d6b7',
+  },
+  rows: [
+    '....',
+  ],
+};"></textarea>
+        <div class="row">
+          <input type="file" id="file" accept=".ts,.txt,text/plain" />
+          <button type="button" id="renderBtn">Render</button>
+        </div>
+        <div class="row">
+          <label style="margin:0">Pixel scale <input type="range" id="scale" min="1" max="24" value="8" /> <span id="scaleVal">8</span>×</label>
+        </div>
+        <p id="meta" class="meta"></p>
+      </div>
+
+      <div class="preview-col">
+        <div id="canvasWrap" class="panel" style="background: var(--panel); margin: 0;">
+          <canvas id="cv" width="32" height="32"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function parseSpriteText(text) {
+      const nameM = /const\s+(\w+)\s*:\s*SpriteDef/.exec(text)
+      const name = nameM ? nameM[1] : '(anonymous)'
+
+      const palette = {}
+      const paletteM = /palette:\s*\{([\s\S]*?)\}\s*,?/.exec(text)
+      if (!paletteM) throw new Error('no palette: { block found')
+      for (const frag of paletteM[1].split(',').map((s) => s.trim()).filter(Boolean)) {
+        const parsed = parsePaletteLine(frag)
+        if (parsed) {
+          const [k, v] = parsed
+          palette[k] = v
+        }
+      }
+
+      const lines = text.split(/\n/)
+      let i = 0
+      while (i < lines.length && !/\brows:\s*\[/.test(lines[i])) i++
+      if (i >= lines.length) throw new Error('no rows: [ found')
+      i++
+
+      const rows = []
+      while (i < lines.length) {
+        const line = lines[i]
+        i++
+        if (/^\s*\],?\s*$/.test(line)) break
+        const m = /^\s*'(.*)'\s*,?\s*$/.exec(line)
+        if (m) rows.push(m[1])
+      }
+
+      return { name, palette, rows }
+    }
+
+    function parsePaletteLine(line) {
+      const t = line.replace(/,\s*$/, '').trim()
+      if (!t || t === '{') return null
+      const idx = t.indexOf(':')
+      if (idx < 0) return null
+      let key = t.slice(0, idx).trim()
+      if ((key.startsWith("'") && key.endsWith("'")) || (key.startsWith('"') && key.endsWith('"')))
+        key = key.slice(1, -1)
+      const rest = t.slice(idx + 1).trim().replace(/,\s*$/, '')
+      if (rest === 'T') return [key, null]
+      const hm = /^'#([0-9a-fA-F]{6})'$/.exec(rest)
+      if (hm) return [key, '#' + hm[1].toLowerCase()]
+      return null
+    }
+
+    function hexToRgb(hex) {
+      const m = /^#([0-9a-fA-F]{6})$/.exec(hex)
+      if (!m) return [0, 0, 0]
+      const n = parseInt(m[1], 16)
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+
+    function render(canvas, data, scale) {
+      const { palette, rows } = data
+      const transChar = Object.keys(palette).find((k) => palette[k] == null) ?? '.'
+
+      let w = 0
+      for (const r of rows) w = Math.max(w, r.length)
+      const h = rows.length
+      canvas.width = w * scale
+      canvas.height = h * scale
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = 'rgb(0,0,0)'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      for (let y = 0; y < h; y++) {
+        const row = rows[y] ?? ''
+        for (let x = 0; x < w; x++) {
+          const ch = x < row.length ? row[x] : ' '
+          if (!(ch in palette)) {
+            ctx.fillStyle = 'rgb(0,0,0)'
+            ctx.fillRect(x * scale, y * scale, scale, scale)
+            continue
+          }
+          if (palette[ch] == null) {
+            ctx.fillStyle = 'rgb(0,0,0)'
+            ctx.fillRect(x * scale, y * scale, scale, scale)
+            continue
+          }
+          const [r, g, b] = hexToRgb(palette[ch])
+          ctx.fillStyle = `rgb(${r},${g},${b})`
+          ctx.fillRect(x * scale, y * scale, scale, scale)
+        }
+      }
+
+      return { w, h, transChar }
+    }
+
+    const src = document.getElementById('src')
+    const cv = document.getElementById('cv')
+    const meta = document.getElementById('meta')
+    const scaleEl = document.getElementById('scale')
+    const scaleVal = document.getElementById('scaleVal')
+
+    function doRender() {
+      meta.textContent = ''
+      meta.className = 'meta'
+      try {
+        const data = parseSpriteText(src.value)
+        const scale = +scaleEl.value || 8
+        const { w, h, transChar } = render(cv, data, scale)
+        meta.textContent = `${data.name} — ${w}×${h} cells, “${transChar}” → black, scale ${scale}px`
+      } catch (e) {
+        meta.textContent = String(e.message || e)
+        meta.className = 'meta err'
+      }
+    }
+
+    document.getElementById('renderBtn').addEventListener('click', doRender)
+    scaleEl.addEventListener('input', () => {
+      scaleVal.textContent = scaleEl.value
+      if (src.value.trim()) doRender()
+    })
+    document.getElementById('file').addEventListener('change', (ev) => {
+      const f = ev.target.files?.[0]
+      if (!f) return
+      const r = new FileReader()
+      r.onload = () => {
+        src.value = String(r.result || '')
+        doRender()
+      }
+      r.readAsText(f)
+    })
+  </script>
+</body>
+</html>
