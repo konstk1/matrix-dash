@@ -85,12 +85,12 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
-    const countdownPage = createCountdownPage('Maya\'s Party', new Date('2026-04-12T13:00:00-04:00'))
+    const countdownPage = createCountdownPage('Kai\'s B\'Day', new Date('2026-04-26T06:00:00-04:00'))
     const fireworksPage = createFireworksPage()
 
     const carousel = new PageCarousel([
       { page: page1, durationSec: 30 },
-      { page: countdownPage, durationSec: 10 },
+      { page: countdownPage, durationSec: 5 },
       { page: fireworksPage, durationSec: 7 },
     ])
     carousel.start()
