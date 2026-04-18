@@ -6,6 +6,7 @@ import { createAircraftPage } from './pages/aircraft'
 import { createMedsPage } from './pages/meds'
 import { createCountdownPage } from './pages/countdown'
 import { createFireworksPage } from './pages/fireworks'
+import { createPokemonPage } from './pages/pokemon'
 import { PageCarousel } from './page-carousel'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
@@ -57,7 +58,7 @@ async function main() {
     let page1: Page
 
     const showMeds = false
-    const testPage: string | false = false // 'countdown'; // set to page name or false to run normally
+    const testPage: string | false = false // 'pokemon' // set to page name or false to run normally
 
     if (testPage) {
       let page: Page
@@ -70,6 +71,9 @@ async function main() {
           break
         case 'countdown':
           page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-06T07:00:00-04:00'))
+          break
+        case 'pokemon':
+          page = createPokemonPage('random')
           break
         default:
           page = await createAircraftPage()
@@ -85,13 +89,13 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
-    const countdownPage = createCountdownPage('Kai\'s B\'Day', new Date('2026-04-26T06:00:00-04:00'))
-    const fireworksPage = createFireworksPage()
+    const countdownPage = createCountdownPage(' Kai\'s B\'Day', new Date('2026-04-26T06:00:00-04:00'))
+    const pokemonPage = createPokemonPage('random')
 
     const carousel = new PageCarousel([
       { page: page1, durationSec: 30 },
-      { page: countdownPage, durationSec: 5 },
-      { page: fireworksPage, durationSec: 7 },
+      { page: countdownPage, durationSec: 7 },
+      { page: pokemonPage, durationSec: 10 },
     ])
     carousel.start()
 
