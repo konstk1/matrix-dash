@@ -293,10 +293,6 @@ const SPRITES: Record<PokemonName, CompiledSprite> = {
 
 export const POKEMON_NAMES: PokemonName[] = Object.keys(SPRITES) as PokemonName[]
 
-function pickRandom(): PokemonName {
-  return POKEMON_NAMES[Math.floor(Math.random() * POKEMON_NAMES.length)]
-}
-
 function inBox(x: number, boxes: Box[]): boolean {
   return boxes.some(b => x >= b.x0 && x <= b.x1)
 }
@@ -307,12 +303,9 @@ function closedEyePixel(eyes: CompiledEyes | undefined, x: number, y: number): n
   return y === eyes.rowMid ? BLACK : eyes.closedColor
 }
 
-export type PokemonSelection = PokemonName | 'random'
-
 export class PokemonWidget extends Widget {
   protected override updateIntervalMs = 50
 
-  private readonly selection: PokemonSelection
   private current: PokemonName
 
   private blinking = false
@@ -320,28 +313,22 @@ export class PokemonWidget extends Widget {
   private blinkEndAt = 0
   private pendingDoubleBlink = false
 
-  constructor(selection: PokemonSelection, size: Size = { width: 32, height: 32 }, border: number = 0) {
+  constructor(name: PokemonName, size: Size = { width: 32, height: 32 }, border: number = 0) {
     super(size, border)
-    this.selection = selection
-    this.current = selection === 'random' ? pickRandom() : selection
+    this.current = name
+  }
+
+  public setPokemon(name: PokemonName): void {
+    this.current = name
   }
 
   public override activate(): void {
-    const repicked = this.selection === 'random'
-    if (repicked) {
-      this.current = pickRandom()
-    }
     this.blinking = false
     this.pendingDoubleBlink = false
     if (this.hasBlink()) {
       this.scheduleNextBlink(500)
     }
     super.activate()
-    // Page.activate() draws before activating widgets, so a freshly-picked
-    // random pokemon wouldn't appear until the first blink. Force a redraw.
-    if (repicked) {
-      this.draw(true)
-    }
   }
 
   private hasBlink(): boolean {
