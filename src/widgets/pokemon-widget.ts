@@ -394,6 +394,62 @@ const CHARMANDER: SpriteDef = {
   ],
 }
 
+const ZUBAT: SpriteDef = {
+  palette: {
+    a: '#ffffff',
+    b: '#211f1d',
+    c: '#7299af',
+    d: '#404040',
+    e: '#c18bc3',
+    f: '#c0c0c0',
+    g: '#4e7083',
+    h: '#070707',
+    i: '#27272d',
+    j: '#161514',
+    k: '#956497',
+    l: '#121c20',
+    m: '#ecb9ee',
+    n: '#395363',
+    o: '#2a3f4a',
+    p: '#b08ab2',
+  },
+  rows: [
+    '     bb            bbbbb        ',
+    '    bccbb         bccccgb       ',
+    '    bckccbb      bccbkkgb       ',
+    '   jhlkhhiih     hihiklh        ',
+    '    bgebbccb     bcbkegb        ',
+    '     bgekbccb  hbcbkeegb        ',
+    '      bgekbgbbblgcbeegb    bjb  ',
+    '       bgebccccccckggb   bbcgcb ',
+    '        bbcbbbbiccgbb  bbccbjb  ',
+    '        bcbbbbbhbbccb bccgb     ',
+    '       bcbabbbbbabccbbggbb      ',
+    '        bcbbbbbhbbbccbbb        ',
+    '        bgbabbahbbbcbbkb        ',
+    '       bgbcbbbbhbccbbgbeb       ',
+    '      bgbkbccccccbbgbgbeb       ',
+    '     bgbkkbbbbgggggb bcbeb      ',
+    '   j glekkhhhhlhlllh hiieh      ',
+    '  bhbcbeekb   bbbbb  bcbeeb     ',
+    ' bcicbgeeeb          bcbeeb     ',
+    'bcbhbegceeeb        bcbcceb     ',
+    'bcbheeegceeb       bccbcgcb     ',
+    'bcglbeeegceb       bgcbeeggbj   ',
+    ' bcibemeegcb        bgcbeeeekb  ',
+    '  bhcbemmegb         bbcbemekb  ',
+    '    bcbemmeb           bcbempeb ',
+    '    bcbeeeb             bcbekeb ',
+    '     bcbeeb              bcbjeb ',
+    '      bcbeb               bcgbb ',
+    '       jgjj               jnogj ',
+    '       jgjj               jnogj ',
+    '        bcgb               bjcb ',
+    '         bb                  b  ',
+  ],
+};
+
+
 const DEFS = {
   pikachu: PIKACHU,
   squirtle: SQUIRTLE,
@@ -403,6 +459,7 @@ const DEFS = {
   bulbasaur: BULBASAUR,
   dragonite: DRAGONITE,
   charmander: CHARMANDER,
+  zubat: ZUBAT,
 } as const
 
 export type PokemonName = keyof typeof DEFS
@@ -452,6 +509,7 @@ const SPRITES: Record<PokemonName, CompiledSprite> = {
   bulbasaur: compile('bulbasaur', BULBASAUR),
   dragonite: compile('dragonite', DRAGONITE),
   charmander: compile('charmander', CHARMANDER),
+  zubat: compile('zubat', ZUBAT),
 }
 
 export const POKEMON_NAMES: PokemonName[] = Object.keys(SPRITES) as PokemonName[]

@@ -92,8 +92,10 @@
       border-radius: 8px;
       border: 1px solid #2a2a38;
     }
-    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+    canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair; }
     .hint { font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; }
+    button.secondary { background: #2a2a38; color: var(--text); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -116,7 +118,9 @@
         <div class="row">
           <input type="file" id="file" accept=".ts,.txt,text/plain" />
           <button type="button" id="renderBtn">Render</button>
+          <button type="button" id="undoBtn" class="secondary" disabled>Undo</button>
         </div>
+        <p class="hint">Click a pixel on the preview to erase it (turn transparent). Cmd/Ctrl+Z to undo.</p>
         <div class="row">
           <label style="margin:0">Pixel scale <input type="range" id="scale" min="1" max="24" value="8" /> <span id="scaleVal">8</span>×</label>
         </div>
@@ -124,7 +128,7 @@
       </div>
 
       <div class="preview-col">
-        <div id="canvasWrap" class="panel" style="background: var(--panel); margin: 0;">
+        <div id="canvasWrap" class="panel" style="margin: 0;">
           <canvas id="cv" width="32" height="32"></canvas>
         </div>
       </div>
@@ -154,15 +158,20 @@
       i++
 
       const rows = []
+      const rowLineIndices = []
       while (i < lines.length) {
         const line = lines[i]
+        const lineIdx = i
         i++
         if (/^\s*\],?\s*$/.test(line)) break
         const m = /^\s*'(.*)'\s*,?\s*$/.exec(line)
-        if (m) rows.push(m[1])
+        if (m) {
+          rows.push(m[1])
+          rowLineIndices.push(lineIdx)
+        }
       }
 
-      return { name, palette, rows }
+      return { name, palette, rows, rowLineIndices }
     }
 
     function parsePaletteLine(line) {
@@ -197,23 +206,13 @@
       canvas.width = w * scale
       canvas.height = h * scale
       const ctx = canvas.getContext('2d')
-      ctx.fillStyle = 'rgb(0,0,0)'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       for (let y = 0; y < h; y++) {
         const row = rows[y] ?? ''
         for (let x = 0; x < w; x++) {
           const ch = x < row.length ? row[x] : ' '
-          if (!(ch in palette)) {
-            ctx.fillStyle = 'rgb(0,0,0)'
-            ctx.fillRect(x * scale, y * scale, scale, scale)
-            continue
-          }
-          if (palette[ch] == null) {
-            ctx.fillStyle = 'rgb(0,0,0)'
-            ctx.fillRect(x * scale, y * scale, scale, scale)
-            continue
-          }
+          if (!(ch in palette) || palette[ch] == null) continue
           const [r, g, b] = hexToRgb(palette[ch])
           ctx.fillStyle = `rgb(${r},${g},${b})`
           ctx.fillRect(x * scale, y * scale, scale, scale)
@@ -228,25 +227,155 @@
     const meta = document.getElementById('meta')
     const scaleEl = document.getElementById('scale')
     const scaleVal = document.getElementById('scaleVal')
+    const undoBtn = document.getElementById('undoBtn')
+
+    let state = null
+    let undoStack = []
+
+    function updateMeta() {
+      if (!state) return
+      const editTxt = undoStack.length ? `, ${undoStack.length} edit${undoStack.length === 1 ? '' : 's'}` : ''
+      const tc = state.transChar ? `“${state.transChar}” → transparent` : 'no transparent palette entry'
+      meta.textContent = `${state.data.name} — ${state.w}×${state.h} cells, ${tc}, scale ${state.scale}px${editTxt}`
+      meta.className = 'meta'
+      undoBtn.disabled = undoStack.length === 0
+    }
+
+    function redraw() {
+      if (!state) return
+      const scale = +scaleEl.value || 8
+      const { w, h } = render(cv, state.data, scale)
+      state.scale = scale
+      state.w = w
+      state.h = h
+      updateMeta()
+    }
 
     function doRender() {
       meta.textContent = ''
       meta.className = 'meta'
       try {
         const data = parseSpriteText(src.value)
-        const scale = +scaleEl.value || 8
-        const { w, h, transChar } = render(cv, data, scale)
-        meta.textContent = `${data.name} — ${w}×${h} cells, “${transChar}” → black, scale ${scale}px`
+        const transChar = Object.keys(data.palette).find((k) => data.palette[k] == null) ?? null
+        state = { data, transChar, scale: 0, w: 0, h: 0 }
+        undoStack = []
+        redraw()
       } catch (e) {
+        state = null
+        undoStack = []
+        undoBtn.disabled = true
         meta.textContent = String(e.message || e)
         meta.className = 'meta err'
       }
     }
 
+    function updateSourceLine(lineIdx, newRowContent) {
+      const lines = src.value.split('\n')
+      if (lineIdx < 0 || lineIdx >= lines.length) return
+      lines[lineIdx] = lines[lineIdx].replace(/'(.*)'/, () => `'${newRowContent}'`)
+      src.value = lines.join('\n')
+    }
+
+    let dragging = null
+
+    function pixelAtEvent(ev) {
+      const rect = cv.getBoundingClientRect()
+      const px = (ev.clientX - rect.left) * (cv.width / rect.width)
+      const py = (ev.clientY - rect.top) * (cv.height / rect.height)
+      return { x: Math.floor(px / state.scale), y: Math.floor(py / state.scale) }
+    }
+
+    function eraseCellInDrag(x, y) {
+      if (!dragging) return
+      const key = `${x},${y}`
+      if (dragging.visited.has(key)) return
+      dragging.visited.add(key)
+      const row = state.data.rows[y]
+      if (row == null || x < 0 || x >= row.length) return
+      const cur = row[x]
+      if (cur === state.transChar) return
+      dragging.group.push({ y, x, prevChar: cur })
+      const newRow = row.slice(0, x) + state.transChar + row.slice(x + 1)
+      state.data.rows[y] = newRow
+      updateSourceLine(state.data.rowLineIndices[y], newRow)
+      dragging.dirty = true
+    }
+
+    function eraseLine(x0, y0, x1, y1) {
+      const dx = Math.abs(x1 - x0)
+      const dy = Math.abs(y1 - y0)
+      const sx = x0 < x1 ? 1 : -1
+      const sy = y0 < y1 ? 1 : -1
+      let err = dx - dy
+      let x = x0
+      let y = y0
+      while (true) {
+        eraseCellInDrag(x, y)
+        if (x === x1 && y === y1) break
+        const e2 = 2 * err
+        if (e2 > -dy) { err -= dy; x += sx }
+        if (e2 < dx) { err += dx; y += sy }
+      }
+    }
+
+    function undo() {
+      if (!state || !undoStack.length) return
+      const group = undoStack.pop()
+      for (let i = group.length - 1; i >= 0; i--) {
+        const { y, x, prevChar } = group[i]
+        const row = state.data.rows[y]
+        const newRow = row.slice(0, x) + prevChar + row.slice(x + 1)
+        state.data.rows[y] = newRow
+        updateSourceLine(state.data.rowLineIndices[y], newRow)
+      }
+      redraw()
+    }
+
+    cv.addEventListener('mousedown', (ev) => {
+      if (ev.button !== 0 || !state) return
+      if (!state.transChar) {
+        meta.textContent = 'no transparent palette entry — add e.g. "\'.\': T," to the palette'
+        meta.className = 'meta err'
+        return
+      }
+      ev.preventDefault()
+      const { x, y } = pixelAtEvent(ev)
+      dragging = { group: [], visited: new Set(), lastX: x, lastY: y, dirty: false }
+      eraseCellInDrag(x, y)
+      if (dragging.dirty) { redraw(); dragging.dirty = false }
+    })
+
+    window.addEventListener('mousemove', (ev) => {
+      if (!dragging) return
+      const { x, y } = pixelAtEvent(ev)
+      if (x === dragging.lastX && y === dragging.lastY) return
+      eraseLine(dragging.lastX, dragging.lastY, x, y)
+      dragging.lastX = x
+      dragging.lastY = y
+      if (dragging.dirty) { redraw(); dragging.dirty = false }
+    })
+
+    window.addEventListener('mouseup', () => {
+      if (!dragging) return
+      if (dragging.group.length) undoStack.push(dragging.group)
+      dragging = null
+      updateMeta()
+    })
+
+    document.addEventListener('keydown', (ev) => {
+      const isUndo = (ev.metaKey || ev.ctrlKey) && !ev.shiftKey && (ev.key === 'z' || ev.key === 'Z')
+      if (!isUndo) return
+      if (ev.target === src) return
+      ev.preventDefault()
+      undo()
+    })
+
+    undoBtn.addEventListener('click', undo)
     document.getElementById('renderBtn').addEventListener('click', doRender)
     scaleEl.addEventListener('input', () => {
       scaleVal.textContent = scaleEl.value
-      if (src.value.trim()) doRender()
+      if (state) redraw()
+      else if (src.value.trim()) doRender()
     })
     document.getElementById('file').addEventListener('change', (ev) => {
       const f = ev.target.files?.[0]
