@@ -8,7 +8,7 @@ export function createFireworksPage(): Page {
   const page = new Page('fireworks')
   const fireworks = new FireworksWidget({ width: COLS, height: ROWS })
   // Light pink: 0xFFB6C1
-  fireworks.setOverlayText(["Pikachu", '!!!!!'], 0xFFFF00)
+  fireworks.setOverlayText(["Happy B'Day", 'Kai!'], 0xFF6600)
   page.addWidget(fireworks, { x: 0, y: 0 })
   return page
 }

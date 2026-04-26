@@ -140,6 +140,20 @@ export class FireworksWidget extends Widget {
     super.draw(false)
     if (!this.matrix) return
 
+    if (this.overlayLines.length > 0) {
+      const lineHeight = 10
+      const totalHeight = this.overlayLines.length * lineHeight
+      const startY = this.origin.y + Math.floor((this.size.height - totalHeight) / 2)
+      this.matrix
+        .font(this.font)
+        .fgColor(this.overlayColor)
+      for (let i = 0; i < this.overlayLines.length; i++) {
+        const textWidth = this.font.stringWidth(this.overlayLines[i], this.fontKerning)
+        const x = this.origin.x + Math.floor((this.size.width - textWidth) / 2)
+        this.matrix.drawText(this.overlayLines[i], x, startY + i * lineHeight, this.fontKerning)
+      }
+    }
+
     for (const fw of this.fireworks) {
       if (!fw.exploded) {
         // draw rocket trail
@@ -176,20 +190,6 @@ export class FireworksWidget extends Widget {
               .setPixel(this.origin.x + px, this.origin.y + py)
           }
         }
-      }
-    }
-
-    if (this.overlayLines.length > 0) {
-      const lineHeight = 10
-      const totalHeight = this.overlayLines.length * lineHeight
-      const startY = this.origin.y + Math.floor((this.size.height - totalHeight) / 2)
-      this.matrix
-        .font(this.font)
-        .fgColor(this.overlayColor)
-      for (let i = 0; i < this.overlayLines.length; i++) {
-        const textWidth = this.font.stringWidth(this.overlayLines[i], this.fontKerning)
-        const x = this.origin.x + Math.floor((this.size.width - textWidth) / 2)
-        this.matrix.drawText(this.overlayLines[i], x, startY + i * lineHeight, this.fontKerning)
       }
     }
 

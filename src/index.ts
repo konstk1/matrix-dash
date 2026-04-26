@@ -29,9 +29,9 @@ function autoDimmer(page: Page) {
   if (level < 5) {
     newBrightness = 20
   } else if (level < 10) {
-    newBrightness = 35
+    newBrightness = 70 // 35
   } else {
-    newBrightness = 50
+    newBrightness = 100 // 50
   }
 
   if (newBrightness !== currentBrightness) {
@@ -58,7 +58,7 @@ async function main() {
     let page1: Page
 
     const showMeds = false
-    const testPage: string | false = false //'pokemon' // set to page name or false to run normally
+    const testPage: string | false = false //'fireworks' // set to page name or false to run normally
 
     if (testPage) {
       let page: Page
@@ -89,12 +89,14 @@ async function main() {
       page1 = await createAircraftPage()
     }
 
+    // @ts-ignore
     const countdownPage = createCountdownPage(' Kai\'s B\'Day', new Date('2026-04-26T06:00:00-04:00'))
+    const fireworksPage = createFireworksPage()
     const pokemonPage = createPokemonPage('random')
 
     const carousel = new PageCarousel([
-      { page: page1, durationSec: 30 },
-      { page: countdownPage, durationSec: 7 },
+      { page: page1, durationSec: 10 },
+      { page: fireworksPage, durationSec: 15 },
       { page: pokemonPage, durationSec: 10 },
     ])
     carousel.start()
