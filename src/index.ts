@@ -29,9 +29,9 @@ function autoDimmer(page: Page) {
   if (level < 5) {
     newBrightness = 20
   } else if (level < 10) {
-    newBrightness = 70 // 35
+    newBrightness = 35
   } else {
-    newBrightness = 100 // 50
+    newBrightness = 50
   }
 
   if (newBrightness !== currentBrightness) {
@@ -91,12 +91,14 @@ async function main() {
 
     // @ts-ignore
     const countdownPage = createCountdownPage(' Kai\'s B\'Day', new Date('2026-04-26T06:00:00-04:00'))
+    // @ts-ignore
     const fireworksPage = createFireworksPage()
+    // @ts-ignore
     const pokemonPage = createPokemonPage('random')
 
     const carousel = new PageCarousel([
-      { page: page1, durationSec: 10 },
-      { page: fireworksPage, durationSec: 15 },
+      { page: page1, durationSec: 25 },
+      // { page: fireworksPage, durationSec: 15 },
       { page: pokemonPage, durationSec: 10 },
     ])
     carousel.start()
