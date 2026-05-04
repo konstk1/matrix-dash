@@ -97,7 +97,7 @@ async function main() {
     const pokemonPage = createPokemonPage('random')
 
     const carousel = new PageCarousel([
-      { page: page1, durationSec: 25 },
+      { page: page1, durationSec: 300 },
       // { page: fireworksPage, durationSec: 15 },
       { page: pokemonPage, durationSec: 10 },
     ])
