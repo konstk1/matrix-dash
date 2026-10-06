@@ -6,7 +6,7 @@ import { createAircraftPage } from './pages/aircraft'
 import { createMedsPage } from './pages/meds'
 import { createCountdownPage } from './pages/countdown'
 import { createFireworksPage } from './pages/fireworks'
-import { createPokemonPage } from './pages/pokemon'
+import { createHalloweenPage } from './animations/halloween/page'
 import { PageCarousel } from './page-carousel'
 import { BabyTracker } from './services/babytracker'
 import log from './log'
@@ -72,8 +72,8 @@ async function main() {
         case 'countdown':
           page = createCountdownPage('Maya\'s B-Day', new Date('2026-04-06T07:00:00-04:00'))
           break
-        case 'pokemon':
-          page = createPokemonPage('eevee2')
+        case 'halloween':
+          page = createHalloweenPage()
           break
         default:
           page = await createAircraftPage()
@@ -94,12 +94,12 @@ async function main() {
     // @ts-ignore
     const fireworksPage = createFireworksPage()
     // @ts-ignore
-    const pokemonPage = createPokemonPage('random')
+    const halloweenPage = createHalloweenPage()
 
     const carousel = new PageCarousel([
-      { page: page1, durationSec: 300 },
+      { page: page1, durationSec: 120 },
       // { page: fireworksPage, durationSec: 15 },
-      { page: pokemonPage, durationSec: 10 },
+      { page: halloweenPage, durationSec: 15 },
     ])
     carousel.start()
 
